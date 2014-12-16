@@ -1,11 +1,12 @@
 require 'optparse'
+require 'vagrant'
 
 module VagrantPlugins
   module Orchestrate
     module Command
       class Root < Vagrant.plugin(2, :command)
         def self.synopsis
-          "Orchestrates provsioning of managed servers. Useful across environments"
+          "Orchestrates provsioning of managed servers. Useful for deploying changes repeatedly across multiple managed environments"
         end
 
         def initialize(argv, env)
@@ -90,20 +91,3 @@ module VagrantPlugins
     end
   end
 end
-
-=begin
-require 'optparse'
-
-module VagrantPlugins
-  module Orchestrate
-    module Command
-      class Root < Vagrant.plugin("2", :command)
-        def self.synopsis
-          "manages boxes: installation, removal, etc."
-        end
-
-      end
-    end
-  end
-end
-=end
