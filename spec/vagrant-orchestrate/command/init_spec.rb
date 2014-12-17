@@ -114,20 +114,19 @@ describe VagrantPlugins::Orchestrate::Command::Init do
   end
 
   context "ssh" do
-
     describe "default" do
-     it "has default username and password" do
-       subject.execute
-       expect(iso_env.vagrantfile.config.ssh.username).to eq(described_class::DEFAULT_SSH_USERNAME)
-       expect(iso_env.vagrantfile.config.ssh.password).to eq(described_class::DEFAULT_SSH_PASSWORD)
-     end
+      it "has default username and password" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.ssh.username).to eq(described_class::DEFAULT_SSH_USERNAME)
+        expect(iso_env.vagrantfile.config.ssh.password).to eq(described_class::DEFAULT_SSH_PASSWORD)
+      end
     end
 
     describe "username" do
       let(:argv) { ["--ssh-username", "SSH_USERNAME"] }
       it "is passed through" do
         subject.execute
-        expect(iso_env.vagrantfile.config.ssh.username).to eq ("SSH_USERNAME")
+        expect(iso_env.vagrantfile.config.ssh.username).to eq("SSH_USERNAME")
       end
     end
 
@@ -136,6 +135,27 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "is passed through" do
         subject.execute
         expect(iso_env.vagrantfile.config.ssh.password).to eq("SSH_PASSWORD")
+      end
+    end
+  end
+
+  context "plugins" do
+    describe "default" do
+      it "has no plugins in vagrantfile" do
+        subject.execute
+        # Since the plugin stuff isn't part of the actual Vagrantfile spec, we'll
+        # just peek at the text of the file
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).not_to include("required_plugins")
+      end
+    end
+
+    describe "specified plugins" do
+      let(:argv) { ["--plugins", "plugin1,plugin2"] }
+      it "are required" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("required_plugins = %w( plugin1 plugin2 )")
       end
     end
   end

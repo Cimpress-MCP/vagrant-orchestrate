@@ -19,6 +19,7 @@ module VagrantPlugins
           options = {}
 
           options[:provisioners] = []
+          options[:plugins] = []
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -67,6 +68,11 @@ module VagrantPlugins
               options[:winrm_password] = p
             end
 
+            o.on("--plugins x,y,z", Array,
+                 "A comma separated list of vagrant plugins to be installed") do |p|
+              options[:plugins] = p
+            end
+
             o.on("-f", "--force", "Force overwriting of files") do
               options[:force] = true
             end
@@ -92,7 +98,8 @@ module VagrantPlugins
                                              winrm_password: options[:winrm_password],
                                              ssh_username: options[:ssh_username],
                                              ssh_password: options[:ssh_password],
-                                             ssh_private_key_path: options[:ssh_private_key_path]
+                                             ssh_private_key_path: options[:ssh_private_key_path],
+                                             plugins: options[:plugins]
                                              )
           write_vagrantfile(contents, options)
 
