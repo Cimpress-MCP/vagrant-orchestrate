@@ -1,12 +1,13 @@
-require 'optparse'
-require 'vagrant'
+require "optparse"
+require "vagrant"
 
 module VagrantPlugins
   module Orchestrate
     module Command
       class Root < Vagrant.plugin(2, :command)
         def self.synopsis
-          "Orchestrates provsioning of managed servers. Useful for deploying changes repeatedly across multiple managed environments"
+          'Orchestrates provsioning of managed servers. Useful for deploying changes \
+          repeatedly across multiple managed environments'
         end
 
         def initialize(argv, env)
@@ -17,36 +18,34 @@ module VagrantPlugins
           @subcommands = Vagrant::Registry.new
 
           @subcommands.register(:init) do
-            require_relative 'init'
+            require_relative "init"
             Init
           end
 
-=begin
-          @subcommands.register(:list) do
-            require File.expand_path("../list", __FILE__)
-            List
-          end
-
-          @subcommands.register(:outdated) do
-            require_relative "outdated"
-            Outdated
-          end
-
-          @subcommands.register(:remove) do
-            require File.expand_path("../remove", __FILE__)
-            Remove
-          end
-
-          @subcommands.register(:repackage) do
-            require File.expand_path("../repackage", __FILE__)
-            Repackage
-          end
-
-          @subcommands.register(:update) do
-            require_relative "update"
-            Update
-          end
-=end
+          #           @subcommands.register(:list) do
+          #             require File.expand_path("../list", __FILE__)
+          #             List
+          #           end
+          #
+          #           @subcommands.register(:outdated) do
+          #             require_relative "outdated"
+          #             Outdated
+          #           end
+          #
+          #           @subcommands.register(:remove) do
+          #             require File.expand_path("../remove", __FILE__)
+          #             Remove
+          #           end
+          #
+          #           @subcommands.register(:repackage) do
+          #             require File.expand_path("../repackage", __FILE__)
+          #             Repackage
+          #           end
+          #
+          #           @subcommands.register(:update) do
+          #             require_relative "update"
+          #             Update
+          #           end
         end
 
         def execute
@@ -66,27 +65,29 @@ module VagrantPlugins
         end
 
         # Prints the help out for this command
+        # rubocop:disable Metrics/AbcSize
         def help
-          opts = OptionParser.new do |opts|
-            opts.banner = "Usage: vagrant orchestrate <subcommand> [<args>]"
-            opts.separator ""
-            opts.separator "Available subcommands:"
+          opts = OptionParser.new do |o|
+            o.banner = "Usage: vagrant orchestrate <subcommand> [<args>]"
+            o.separator ""
+            o.separator "Available subcommands:"
 
             # Add the available subcommands as separators in order to print them
             # out as well.
             keys = []
-            @subcommands.each { |key, value| keys << key.to_s }
+            @subcommands.each { |key, _value| keys << key.to_s }
 
             keys.sort.each do |key|
-              opts.separator "     #{key}"
+              o.separator "     #{key}"
             end
 
-            opts.separator ""
-            opts.separator "For help on any individual subcommand run `vagrant orchestrate <subcommand> -h`"
+            o.separator ""
+            o.separator "For help on any individual subcommand run `vagrant orchestrate <subcommand> -h`"
           end
 
           @env.ui.info(opts.help, prefix: false)
         end
+        # rubocop:enable Metrics/AbcSize
       end
     end
   end
