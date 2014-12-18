@@ -17,7 +17,7 @@ module VagrantPlugins
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
-        # rubocop:disable Metrics/AbcSize, MethodLength
+        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
         def execute
           options = {}
 
@@ -50,6 +50,15 @@ module VagrantPlugins
 
             o.on("--puppet", "Shorthand for --provisioner-with=puppet") do
               options[:provisioners] << "puppet"
+            end
+
+            o.on("--puppet-hiera", "Include templates for hiera. Only with --puppet") do |p|
+              options[:puppet_hiera] = p
+            end
+
+            o.on("--puppet-librarian-puppet",
+                 "Include a Puppetfile and the vagrant-librarian-puppet plugin. Only with --puppet") do |p|
+              options[:puppet_librarian_puppet] = p
             end
 
             o.on("--ssh-username USERNAME", String, "The username for communicating over ssh") do |u|
@@ -92,6 +101,31 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
+          if options[:provisioners].include? "puppet"
+            options[:puppet_librarian_puppet] ||= true
+            if options[:puppet_librarian_puppet]
+              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
+              write_file "Puppetfile", contents, options
+              FileUtils.mkdir_p(File.join(@env.cwd, "modules"))
+              contents = "# This is a placeholder file to keep the modules directory around."
+              write_file(File.join(@env.cwd, "modules", ".PLACEHOLDER"), contents, options)
+              options[:plugins] << "vagrant-librarian-puppet"
+              @env.ui.info(I18n.t("vagrant_orchestrate.librarian_puppet.gitignore"), prefix: false)
+            end
+
+            options[:puppet_hiera] ||= true
+            if options[:puppet_hiera]
+              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
+              write_file("hiera.yaml", contents, options)
+              FileUtils.mkdir_p(File.join(@env.cwd, "hiera"))
+              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
+              write_file(File.join(@env.cwd, "hiera", "common.yaml"), contents, options)
+            end
+
+            FileUtils.mkdir_p(File.join(@env.cwd, "manifests"))
+            write_file(File.join(@env.cwd, "manifests", "default.pp"), "# Your puppet code goes here", options)
+          end
+
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:shell_inline] ||= DEFAULT_SHELL_INLINE
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
@@ -105,6 +139,8 @@ module VagrantPlugins
                                              provisioners: options[:provisioners],
                                              shell_paths: options[:shell_paths],
                                              shell_inline: options[:shell_inline],
+                                             puppet_librarian_puppet: options[:puppet_librarian_puppet],
+                                             puppet_hiera: options[:puppet_hiera],
                                              communicator: options[:communicator],
                                              winrm_username: options[:winrm_username],
                                              winrm_password: options[:winrm_password],
@@ -114,19 +150,19 @@ module VagrantPlugins
                                              servers: options[:servers],
                                              plugins: options[:plugins]
                                              )
-          write_vagrantfile(contents, options)
+          write_file("Vagrantfile", contents, options)
 
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
           # Success, exit status 0
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
 
         private
 
-        def write_vagrantfile(contents, options)
-          save_path = Pathname.new("Vagrantfile").expand_path(@env.cwd)
+        def write_file(filename, contents, options)
+          save_path = Pathname.new(filename).expand_path(@env.cwd)
           save_path.delete if save_path.exist? && options[:force]
           fail Vagrant::Errors::VagrantfileExistsError if save_path.exist?
 

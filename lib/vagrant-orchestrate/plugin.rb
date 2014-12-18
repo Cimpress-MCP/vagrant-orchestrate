@@ -19,6 +19,9 @@ module VagrantPlugins
       DESC
 
       command(:orchestrate) do
+        setup_i18n
+        setup_logging
+
         require_relative "command/root"
         Command::Root
       end

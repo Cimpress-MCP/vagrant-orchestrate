@@ -75,12 +75,18 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
   end
 
-  context "puppet provisioner" do
+  context "puppet" do
     describe "basic operation" do
       let(:argv) { ["--provision-with", "puppet"] }
       it "creates a vagrantfile with a puppet provisioner" do
         subject.execute
         expect(iso_env.vagrantfile.config.vm.provisioners.first.type).to eq(:puppet)
+      end
+
+      it "creates the default files" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("manifests")
+        expect(Dir.entries(File.join(iso_env.cwd, "manifests"))).to include("default.pp")
       end
     end
 
@@ -89,6 +95,54 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "creates a vagrantfile with a puppet provisioner" do
         subject.execute
         expect(iso_env.vagrantfile.config.vm.provisioners.first.type).to eq(:puppet)
+      end
+    end
+
+    describe "librarian puppet" do
+      let(:argv) { ["--puppet", "--puppet-librarian-puppet"] }
+      it "is passed into the Vagrantfile" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.librarian_puppet.placeholder_filename).to eq(".PLACEHOLDER")
+      end
+
+      it "creates the modules directory and placeholder" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("modules")
+        expect(Dir.entries(File.join(iso_env.cwd, "modules"))).to include(".PLACEHOLDER")
+      end
+
+      it "creates the Puppetfile" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("Puppetfile")
+      end
+
+      it "contains the plugin" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("vagrant-librarian-puppet")
+      end
+
+      describe "ui" do
+        let(:ui_class) { Vagrant::UI::Basic }
+        it "displays a .gitignore message" do
+          output = capture_stdout { subject.execute }
+          expect(output).to include(".gitignore")
+        end
+      end
+    end
+
+    describe "hiera" do
+      let(:argv) { ["--puppet", "--puppet-hiera"] }
+      it "is passed into the Vagrantfile" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.hiera_config_path).to eq("hiera.yaml")
+      end
+
+      it "creates the file" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("hiera.yaml")
+        expect(Dir.entries(iso_env.cwd)).to include("hiera")
+        expect(Dir.entries(File.join(iso_env.cwd, "hiera"))).to include("common.yaml")
       end
     end
   end
