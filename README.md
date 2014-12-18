@@ -28,7 +28,7 @@ This works for Windows managed servers as well
 For a full list of init options, run `vagrant orchestrate init --help`
 
 ### Pushing changes
-Go ahead and push changes to your managed servers.
+Go ahead and push changes to your managed servers
 
     $ vagrant orchestrate push
 
@@ -46,7 +46,7 @@ merge that feature into downstream environments to avoid conflicts.
 
 ## Tips for Windows hosts
 
-* Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script]() to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
+* Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script](https://github.com/joefitzgerald/packer-windows/blob/master/scripts/rsync.bat) to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
 
 ## Contributing
 
