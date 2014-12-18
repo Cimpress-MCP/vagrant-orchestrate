@@ -1,6 +1,7 @@
 require "optparse"
 require "vagrant"
 
+# rubocop:disable Metrics/ClassLength
 module VagrantPlugins
   module Orchestrate
     module Command
@@ -14,6 +15,7 @@ module VagrantPlugins
         DEFAULT_SSH_USERNAME = "{{YOUR_SSH_USERNAME}}"
         DEFAULT_SSH_PASSWORD = "{{YOUR_SSH_PASSWORD}}"
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
+        DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
         # rubocop:disable Metrics/AbcSize, MethodLength
         def execute
@@ -21,7 +23,7 @@ module VagrantPlugins
 
           options[:provisioners] = []
           options[:servers] = []
-          options[:plugins] = ["vagrant-managed-servers"]
+          options[:plugins] = DEFAULT_PLUGINS
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -50,10 +52,6 @@ module VagrantPlugins
               options[:provisioners] << "puppet"
             end
 
-            o.on("--communicator COMMUNICATOR", String, "The communicator to use. ssh (default) or winrm") do |c|
-              options[:communicator] = c
-            end
-
             o.on("--ssh-username USERNAME", String, "The username for communicating over ssh") do |u|
               options[:ssh_username] = u
             end
@@ -66,6 +64,10 @@ module VagrantPlugins
               options[:ssh_private_key_path] = k
             end
 
+            o.on("--winrm", "Use the winrm communicator") do
+              options[:communicator] = "winrm"
+            end
+
             o.on("--winrm-username USERNAME", String, "The username for communicating with winrm") do |u|
               options[:winrm_username] = u
             end
@@ -75,7 +77,7 @@ module VagrantPlugins
             end
 
             o.on("--plugins x,y,z", Array, "A comma separated list of vagrant plugins to be installed") do |p|
-              options[:plugins] = p
+              options[:plugins] += p
             end
 
             o.on("--servers x,y,z", Array, "A comma separated list of servers hostnames or IPs to deploy to") do |list|
@@ -87,7 +89,6 @@ module VagrantPlugins
             end
           end
 
-          # Parse the options
           argv = parse_options(opts)
           return unless argv
 
@@ -129,7 +130,6 @@ module VagrantPlugins
           save_path.delete if save_path.exist? && options[:force]
           fail Vagrant::Errors::VagrantfileExistsError if save_path.exist?
 
-          # Write out the contents
           begin
             save_path.open("w+") do |f|
               f.write(contents)
@@ -142,3 +142,4 @@ module VagrantPlugins
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

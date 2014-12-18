@@ -2,7 +2,6 @@ require "vagrant-orchestrate/plugin"
 
 module VagrantPlugins
   module Orchestrate
-
     # This returns the path to the source of this plugin.
     #
     # @return [Pathname]

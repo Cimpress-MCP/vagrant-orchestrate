@@ -60,7 +60,6 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--shell", "--shell-inline", "echo Hello, World!"] }
       it "is passed through" do
         subject.execute
-        pp iso_env.vagrantfile.config.vm.provisioners
         expect(iso_env.vagrantfile.config.vm.provisioners.first.config.inline).to eq("echo Hello, World!")
       end
     end
@@ -95,8 +94,8 @@ describe VagrantPlugins::Orchestrate::Command::Init do
   end
 
   context "winrm" do
-    describe "communicator" do
-      let(:argv) { ["--communicator", "winrm"] }
+    describe "basic" do
+      let(:argv) { ["--winrm"] }
       it "creates a vagrantfile with the winrm communicator" do
         subject.execute
         expect(iso_env.vagrantfile.config.vm.communicator).to eq(:winrm)
@@ -106,7 +105,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
 
     describe "username" do
-      let(:argv) { ["--communicator", "winrm", "--winrm-username", "WINRM_USERNAME"] }
+      let(:argv) { ["--winrm", "--winrm-username", "WINRM_USERNAME"] }
       it "is parsed correctly" do
         subject.execute
         expect(iso_env.vagrantfile.config.winrm.username).to eq("WINRM_USERNAME")
@@ -114,7 +113,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
 
     describe "password" do
-      let(:argv) { ["--communicator", "winrm", "--winrm-password", "WINRM_PASSWORD"] }
+      let(:argv) { ["--winrm", "--winrm-password", "WINRM_PASSWORD"] }
       it "is parsed correctly" do
         subject.execute
         expect(iso_env.vagrantfile.config.winrm.password).to eq("WINRM_PASSWORD")
@@ -158,12 +157,12 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
   context "plugins" do
     describe "default" do
-      it "has no plugins in vagrantfile" do
+      it "has default plugins in vagrantfile" do
         subject.execute
         # Since the plugin stuff isn't part of the actual Vagrantfile spec, we'll
         # just peek at the text of the file
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).not_to include("required_plugins")
+        expect(vagrantfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} )")
       end
     end
 
@@ -172,7 +171,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "are required" do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include("required_plugins = %w( plugin1 plugin2 )")
+        expect(vagrantfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} plugin1 plugin2 )")
       end
     end
   end
@@ -186,7 +185,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       end
     end
 
-    describe "specified plugins" do
+    describe "specified servers" do
       let(:argv) { ["--servers", "server1,server2"] }
       it "are required" do
         subject.execute
