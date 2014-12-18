@@ -23,7 +23,7 @@ managed servers that the `push` command will operate on.
 
 This works for Windows managed servers as well
 
-    $ vagrant orchestrate init --winrm [--winrm-username=USERNAME --winrm-password=PASSWORD]
+    $ vagrant orchestrate init --winrm [--winrm-username USERNAME --winrm-password PASSWORD]
 
 For a full list of init options, run `vagrant orchestrate init --help`
 
