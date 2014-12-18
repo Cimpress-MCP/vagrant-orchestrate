@@ -1,6 +1,6 @@
 # Vagrant Orchestrate
 
-This is a Vagrant plugin that allows orchestrated deployments
+This is a Vagrant 1.6+ plugin that allows orchestrated deployments
 to existing servers on top of the excellent vagrant-managed-servers plugin.
 It features a powerful templating `init` command and is designed from the
 ground up to be cross-platform, with first class support for Windows,

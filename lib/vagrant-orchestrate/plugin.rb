@@ -15,7 +15,7 @@ module VagrantPlugins
     class Plugin < Vagrant.plugin("2")
       name "Orchestrate"
       description <<-DESC
-      This plugin installs commands that make orchestrating managed servers easy.
+      This plugin installs commands that make pushing changes to vagrant-managed-servers easy.
       DESC
 
       command(:orchestrate) do

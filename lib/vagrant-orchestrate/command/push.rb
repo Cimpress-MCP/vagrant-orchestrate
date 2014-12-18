@@ -19,7 +19,10 @@ module VagrantPlugins
           argv = parse_options(opts)
 
           with_target_vms(argv, provider: :managed) do |machine|
-            next unless machine.name.to_s.start_with? "managed-"
+            unless machine.name.to_s.start_with? "managed-"
+              @logger.debug("Skipping machine #{machine.name}")
+              next
+            end
 
             machine.action(:up, options)
             machine.action(:provision, options)

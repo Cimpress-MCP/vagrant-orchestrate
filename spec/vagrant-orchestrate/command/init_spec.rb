@@ -171,7 +171,8 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "are required" do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} plugin1 plugin2 )")
+        expect(vagrantfile).to include("required_plugins =
+          %w( #{described_class::DEFAULT_PLUGINS.join(' ')} plugin1 plugin2 )")
       end
     end
   end
