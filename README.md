@@ -17,7 +17,7 @@ Initialize a Vagrantfile to orchestrate running a script on multiple managed ser
 
     $ vagrant orchestrate init --shell
 
-You'll need to edit your Vagrantfile and replace some of variables, such as ssh username and
+You'll need to edit your Vagrantfile and replace some variables, such as ssh username and
 password, and the path to the script to run. The first line of the file defines an array of
 managed servers that the `push` command will operate on.
 
