@@ -10,4 +10,5 @@ end
 
 group :plugins do
   gem "vagrant-orchestrate", path: "."
+  gem "vagrant-managed-servers"
 end

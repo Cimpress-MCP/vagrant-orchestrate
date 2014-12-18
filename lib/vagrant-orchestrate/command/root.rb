@@ -22,30 +22,10 @@ module VagrantPlugins
             Init
           end
 
-          #           @subcommands.register(:list) do
-          #             require File.expand_path("../list", __FILE__)
-          #             List
-          #           end
-          #
-          #           @subcommands.register(:outdated) do
-          #             require_relative "outdated"
-          #             Outdated
-          #           end
-          #
-          #           @subcommands.register(:remove) do
-          #             require File.expand_path("../remove", __FILE__)
-          #             Remove
-          #           end
-          #
-          #           @subcommands.register(:repackage) do
-          #             require File.expand_path("../repackage", __FILE__)
-          #             Repackage
-          #           end
-          #
-          #           @subcommands.register(:update) do
-          #             require_relative "update"
-          #             Update
-          #           end
+          @subcommands.register(:push) do
+            require_relative "push"
+            Push
+          end
         end
 
         def execute

@@ -56,6 +56,15 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       end
     end
 
+    describe "shell inline" do
+      let(:argv) { ["--shell", "--shell-inline", "echo Hello, World!"] }
+      it "is passed through" do
+        subject.execute
+        pp iso_env.vagrantfile.config.vm.provisioners
+        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.inline).to eq("echo Hello, World!")
+      end
+    end
+
     describe "multiple shell paths" do
       let(:argv) { ["--shell", "--shell-paths", "foo.sh,bar.sh"] }
       it "creates a vagrantfile with custom shell path" do
@@ -137,6 +146,14 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         expect(iso_env.vagrantfile.config.ssh.password).to eq("SSH_PASSWORD")
       end
     end
+
+    describe "private key path" do
+      let(:argv) { ["--ssh-private-key-path", "SSH_PRIVATE_KEY_PATH"] }
+      it "is passed through" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.ssh.private_key_path.first).to eq("SSH_PRIVATE_KEY_PATH")
+      end
+    end
   end
 
   context "plugins" do
@@ -156,6 +173,25 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
         expect(vagrantfile).to include("required_plugins = %w( plugin1 plugin2 )")
+      end
+    end
+  end
+
+  context "servers" do
+    describe "default" do
+      it "has no servers in vagrantfile" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("managed_servers = %w( )")
+      end
+    end
+
+    describe "specified plugins" do
+      let(:argv) { ["--servers", "server1,server2"] }
+      it "are required" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("managed_servers = %w( server1 server2 )")
       end
     end
   end

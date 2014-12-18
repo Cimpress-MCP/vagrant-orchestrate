@@ -8,6 +8,7 @@ module VagrantPlugins
         include Vagrant::Util
 
         DEFAULT_SHELL_PATH = "{{YOUR_SCRIPT_PATH}}"
+        DEFAULT_SHELL_INLINE = "{{YOUR_SCRIPT_COMMAND}}"
         DEFAULT_WINRM_USERNAME = "{{YOUR_WINRM_USERNAME}}"
         DEFAULT_WINRM_PASSWORD = "{{YOUR_WINRM_PASSWORD}}"
         DEFAULT_SSH_USERNAME = "{{YOUR_SSH_USERNAME}}"
@@ -19,7 +20,8 @@ module VagrantPlugins
           options = {}
 
           options[:provisioners] = []
-          options[:plugins] = []
+          options[:servers] = []
+          options[:plugins] = ["vagrant-managed-servers"]
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -31,13 +33,17 @@ module VagrantPlugins
               options[:provisioners] = list
             end
 
-            o.on("--shell", "Shorthand for --provisioner-with=shell") do
+            o.on("--shell", "Shorthand for --provision-with shell") do
               options[:provisioners] << "shell"
             end
 
             o.on("--shell-paths x,y,z", Array,
                  "Comma separated list of shell scripts to run on provision. Only with --shell") do |list|
               options[:shell_paths] = list
+            end
+
+            o.on("--shell-inline command", String, "Inline script to run. Only with --shell") do |c|
+              options[:shell_inline] = c
             end
 
             o.on("--puppet", "Shorthand for --provisioner-with=puppet") do
@@ -56,7 +62,7 @@ module VagrantPlugins
               options[:ssh_password] = p
             end
 
-            o.on("--ssh-private-key-path", String, "The path to the private key for communinicating over ssh") do |k|
+            o.on("--ssh-private-key-path PATH", String, "Paths to the private key for communinicating over ssh") do |k|
               options[:ssh_private_key_path] = k
             end
 
@@ -68,9 +74,12 @@ module VagrantPlugins
               options[:winrm_password] = p
             end
 
-            o.on("--plugins x,y,z", Array,
-                 "A comma separated list of vagrant plugins to be installed") do |p|
+            o.on("--plugins x,y,z", Array, "A comma separated list of vagrant plugins to be installed") do |p|
               options[:plugins] = p
+            end
+
+            o.on("--servers x,y,z", Array, "A comma separated list of servers hostnames or IPs to deploy to") do |list|
+              options[:servers] = list
             end
 
             o.on("-f", "--force", "Force overwriting of files") do
@@ -82,7 +91,8 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          options[:shell_paths] ||= [DEFAULT_SHELL_PATH]
+          options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
+          options[:shell_inline] ||= DEFAULT_SHELL_INLINE
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
           options[:winrm_password] ||= DEFAULT_WINRM_PASSWORD
           options[:communicator] ||= "ssh"
@@ -93,12 +103,14 @@ module VagrantPlugins
           contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
                                              provisioners: options[:provisioners],
                                              shell_paths: options[:shell_paths],
+                                             shell_inline: options[:shell_inline],
                                              communicator: options[:communicator],
                                              winrm_username: options[:winrm_username],
                                              winrm_password: options[:winrm_password],
                                              ssh_username: options[:ssh_username],
                                              ssh_password: options[:ssh_password],
                                              ssh_private_key_path: options[:ssh_private_key_path],
+                                             servers: options[:servers],
                                              plugins: options[:plugins]
                                              )
           write_vagrantfile(contents, options)
