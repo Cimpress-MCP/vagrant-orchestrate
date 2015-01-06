@@ -107,7 +107,7 @@ module VagrantPlugins
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
               write_file "Puppetfile", contents, options
               FileUtils.mkdir_p(File.join(@env.cwd, "modules"))
-              write_file(File.join(@env.cwd, "modules", ".gitignore"), "", options)
+              write_file(File.join(@env.cwd, "modules", ".gitignore"), "*", options)
               options[:plugins] << "vagrant-librarian-puppet"
             end
 
