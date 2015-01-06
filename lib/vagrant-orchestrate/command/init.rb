@@ -48,7 +48,7 @@ module VagrantPlugins
               options[:shell_inline] = c
             end
 
-            o.on("--puppet", "Shorthand for --provisioner-with=puppet") do
+            o.on("--puppet", "Shorthand for '--provision-with puppet'") do
               options[:provisioners] << "puppet"
             end
 
