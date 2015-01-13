@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
   <% end -%>
   <% if provisioners.include? "puppet" -%>
   <% if puppet_librarian_puppet -%>
-  config.librarian_puppet.placeholder_filename = ".PLACEHOLDER"
+  config.librarian_puppet.placeholder_filename = ".gitignore"
   <% end -%>
   config.vm.provision "puppet" do |puppet|
     <% if puppet_librarian_puppet -%>

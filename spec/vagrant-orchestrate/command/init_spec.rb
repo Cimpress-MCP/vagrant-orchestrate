@@ -102,13 +102,13 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--puppet", "--puppet-librarian-puppet"] }
       it "is passed into the Vagrantfile" do
         subject.execute
-        expect(iso_env.vagrantfile.config.librarian_puppet.placeholder_filename).to eq(".PLACEHOLDER")
+        expect(iso_env.vagrantfile.config.librarian_puppet.placeholder_filename).to eq(".gitignore")
       end
 
       it "creates the modules directory and placeholder" do
         subject.execute
         expect(Dir.entries(iso_env.cwd)).to include("modules")
-        expect(Dir.entries(File.join(iso_env.cwd, "modules"))).to include(".PLACEHOLDER")
+        expect(Dir.entries(File.join(iso_env.cwd, "modules"))).to include(".gitignore")
       end
 
       it "creates the Puppetfile" do

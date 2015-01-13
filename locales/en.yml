@@ -1,7 +1,2 @@
 en:
   vagrant_orchestrate:
-    librarian_puppet:
-      gitignore: |-
-        It is recommended that you add the following lines to your .gitignore:
-          /modules/
-          !/modules/.PLACEHOLDER
