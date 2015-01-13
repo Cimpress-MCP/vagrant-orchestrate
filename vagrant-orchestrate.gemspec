@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Christopher Baldauf']
   spec.email         = ['cbaldauf@cimpress.com']
   spec.summary       = 'Vagrant plugin to orchestrate the deployment of managed servers.'
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/Cimpress-MCP/vagrant-orchestrate'
   spec.license       = 'Apache 2.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
