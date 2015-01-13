@@ -122,11 +122,12 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         expect(vagrantfile).to include("vagrant-librarian-puppet")
       end
 
-      describe "ui" do
-        let(:ui_class) { Vagrant::UI::Basic }
-        it "displays a .gitignore message" do
-          output = capture_stdout { subject.execute }
-          expect(output).to include(".gitignore")
+      describe "negative" do
+        let(:argv) { ["--puppet", "--no-puppet-librarian-puppet"] }
+        it "shouldn't be included" do
+          subject.execute
+          # This should be the default, as long as the plugin is installed
+          expect(iso_env.vagrantfile.config.librarian_puppet.placeholder_filename).to eq(".PLACEHOLDER")
         end
       end
     end

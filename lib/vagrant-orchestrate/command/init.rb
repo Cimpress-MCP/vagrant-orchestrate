@@ -24,6 +24,9 @@ module VagrantPlugins
           options[:provisioners] = []
           options[:servers] = []
           options[:plugins] = DEFAULT_PLUGINS
+          options[:puppet_librarian_puppet] = true
+          options[:puppet_hiera] = true
+
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -52,11 +55,11 @@ module VagrantPlugins
               options[:provisioners] << "puppet"
             end
 
-            o.on("--puppet-hiera", "Include templates for hiera. Only with --puppet") do |p|
+            o.on("--[no-]puppet-hiera", "Include templates for hiera. Only with --puppet") do |p|
               options[:puppet_hiera] = p
             end
 
-            o.on("--puppet-librarian-puppet",
+            o.on("--[no-]puppet-librarian-puppet",
                  "Include a Puppetfile and the vagrant-librarian-puppet plugin. Only with --puppet") do |p|
               options[:puppet_librarian_puppet] = p
             end
@@ -102,7 +105,6 @@ module VagrantPlugins
           return unless argv
 
           if options[:provisioners].include? "puppet"
-            options[:puppet_librarian_puppet] ||= true
             if options[:puppet_librarian_puppet]
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
               write_file "Puppetfile", contents, options
@@ -111,7 +113,6 @@ module VagrantPlugins
               options[:plugins] << "vagrant-librarian-puppet"
             end
 
-            options[:puppet_hiera] ||= true
             if options[:puppet_hiera]
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
               write_file("hiera.yaml", contents, options)
