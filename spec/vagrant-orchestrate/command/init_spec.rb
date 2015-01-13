@@ -249,4 +249,13 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       end
     end
   end
+
+  context "box" do
+    describe "dummy.box" do
+      it "winds up in the target directory" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("dummy.box")
+      end
+    end
+  end
 end

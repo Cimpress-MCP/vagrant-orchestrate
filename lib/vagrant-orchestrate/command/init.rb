@@ -151,7 +151,8 @@ module VagrantPlugins
                                              plugins: options[:plugins]
                                              )
           write_file("Vagrantfile", contents, options)
-
+          FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
+                       File.join(@env.cwd, "dummy.box"))
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
           # Success, exit status 0
