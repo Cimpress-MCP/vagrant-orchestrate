@@ -44,6 +44,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         subject.execute
         expect(iso_env.vagrantfile.config.vm.provisioners.first.type).to eq(:shell)
         expect(iso_env.vagrantfile.config.vm.provisioners.first.config.path).to eq(described_class::DEFAULT_SHELL_PATH)
+        expect(iso_env.vagrantfile.config.vm.provisioners.count).to eq(1)
       end
     end
 

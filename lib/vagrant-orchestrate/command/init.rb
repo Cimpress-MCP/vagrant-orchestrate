@@ -9,7 +9,6 @@ module VagrantPlugins
         include Vagrant::Util
 
         DEFAULT_SHELL_PATH = "{{YOUR_SCRIPT_PATH}}"
-        DEFAULT_SHELL_INLINE = "{{YOUR_SCRIPT_COMMAND}}"
         DEFAULT_WINRM_USERNAME = "{{YOUR_WINRM_USERNAME}}"
         DEFAULT_WINRM_PASSWORD = "{{YOUR_WINRM_PASSWORD}}"
         DEFAULT_SSH_USERNAME = "{{YOUR_SSH_USERNAME}}"
@@ -26,7 +25,6 @@ module VagrantPlugins
           options[:plugins] = DEFAULT_PLUGINS
           options[:puppet_librarian_puppet] = true
           options[:puppet_hiera] = true
-
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -126,7 +124,6 @@ module VagrantPlugins
           end
 
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
-          options[:shell_inline] ||= DEFAULT_SHELL_INLINE
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
           options[:winrm_password] ||= DEFAULT_WINRM_PASSWORD
           options[:communicator] ||= "ssh"
