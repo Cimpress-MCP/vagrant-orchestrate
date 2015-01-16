@@ -33,7 +33,7 @@ Vagrant.configure("2") do |config|
   <% if ssh_password -%>
   config.ssh.password = "<%= ssh_password %>"
   <% end -%>
-  <% if !ssh_password -%>
+  <% if ssh_private_key_path -%>
   config.ssh.private_key_path = "<%= ssh_private_key_path %>"
   <% end -%>
   <% end -%>

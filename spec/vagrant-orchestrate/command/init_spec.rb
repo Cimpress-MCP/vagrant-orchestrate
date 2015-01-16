@@ -182,7 +182,8 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "has default username and password" do
         subject.execute
         expect(iso_env.vagrantfile.config.ssh.username).to eq(described_class::DEFAULT_SSH_USERNAME)
-        expect(iso_env.vagrantfile.config.ssh.password).to eq(described_class::DEFAULT_SSH_PASSWORD)
+        private_key_path = iso_env.vagrantfile.config.ssh.private_key_path.first
+        expect(private_key_path).to eq(described_class::DEFAULT_SSH_PRIVATE_KEY_PATH)
       end
     end
 
@@ -207,6 +208,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "is passed through" do
         subject.execute
         expect(iso_env.vagrantfile.config.ssh.private_key_path.first).to eq("SSH_PRIVATE_KEY_PATH")
+        expect(iso_env.vagrantfile.config.ssh.password).to be_nil
       end
     end
   end

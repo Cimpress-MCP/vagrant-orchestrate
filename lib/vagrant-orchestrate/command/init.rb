@@ -12,7 +12,6 @@ module VagrantPlugins
         DEFAULT_WINRM_USERNAME = "{{YOUR_WINRM_USERNAME}}"
         DEFAULT_WINRM_PASSWORD = "{{YOUR_WINRM_PASSWORD}}"
         DEFAULT_SSH_USERNAME = "{{YOUR_SSH_USERNAME}}"
-        DEFAULT_SSH_PASSWORD = "{{YOUR_SSH_PASSWORD}}"
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
@@ -128,8 +127,7 @@ module VagrantPlugins
           options[:winrm_password] ||= DEFAULT_WINRM_PASSWORD
           options[:communicator] ||= "ssh"
           options[:ssh_username] ||= DEFAULT_SSH_USERNAME
-          options[:ssh_password] ||= DEFAULT_SSH_PASSWORD unless options[:ssh_private_key_path]
-          options[:ssh_private_key_path] ||= DEFAULT_SSH_PRIVATE_KEY_PATH
+          options[:ssh_private_key_path] ||= DEFAULT_SSH_PRIVATE_KEY_PATH unless options[:ssh_password]
 
           contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
                                              provisioners: options[:provisioners],
