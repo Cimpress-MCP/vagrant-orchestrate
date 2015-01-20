@@ -55,3 +55,21 @@ merge that feature into downstream environments to avoid conflicts.
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+## Development Tips
+
+You'll want Ruby v2.0.0* and bundler for developing changes.
+
+You can install bundler by running
+
+    $ gem install bundler
+
+Bundler documentation is available here (http://bundler.io/).
+
+During the course of development you'll want to run the code you're working on,
+not the version of Vagrant Orchestrate you've installed. In order to accomplish
+this, run your vagrant orchestrate commands in the bundler environment.
+
+In your shell:
+
+    $ bundle exec vagrant orchestrate

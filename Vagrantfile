@@ -6,8 +6,8 @@ required_plugins.each do |plugin|
 end
 Vagrant.configure("2") do |config|
   config.ssh.username = "{{YOUR_SSH_USERNAME}}"
-  config.ssh.password = "poo"
-  config.ssh.private_key_path = "par"
+  config.ssh.password = "{{YOUR_SSH_PASSWORD}}"
+  config.ssh.private_key_path = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
 
   managed_servers.each do |instance|
     config.vm.define "managed-#{instance}" do |box|
