@@ -75,6 +75,7 @@ module VagrantPlugins
 
             o.on("--winrm", "Use the winrm communicator") do
               options[:communicator] = "winrm"
+              options[:plugins] << "vagrant-winrm-s"
             end
 
             o.on("--winrm-username USERNAME", String, "The username for communicating with winrm") do |u|
