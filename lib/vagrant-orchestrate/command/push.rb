@@ -14,7 +14,7 @@ module VagrantPlugins
             o.banner = "Usage: vagrant orchestrate push"
             o.separator ""
 
-            o.on("--reboot", "Reboot a managed server") do
+            o.on("--reboot", "Reboot a managed server after the provisioning step") do
               options[:reboot] = true
             end
           end
