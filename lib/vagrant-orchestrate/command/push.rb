@@ -13,6 +13,10 @@ module VagrantPlugins
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate push"
             o.separator ""
+
+            o.on("--reboot", "Reboot a managed server after the provisioning step") do
+              options[:reboot] = true
+            end
           end
 
           # Parse the options
@@ -26,6 +30,7 @@ module VagrantPlugins
 
             machine.action(:up, options)
             machine.action(:provision, options)
+            machine.action(:reload, options) if options[:reboot]
             machine.action(:destroy, options)
           end
         end
