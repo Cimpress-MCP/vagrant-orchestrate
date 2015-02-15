@@ -1,7 +1,7 @@
 # Vagrant Orchestrate
 
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
-to existing servers on top of the excellent vagrant-managed-servers plugin.
+to already provisioned (non-elastic) servers on top of the excellent vagrant-managed-servers plugin.
 It features a powerful templating `init` command and is designed from the
 ground up to be cross-platform, with first class support for Windows,
 Linux, and Mac.
@@ -43,7 +43,8 @@ end
 ```
 
 You'll need to edit your Vagrantfile and replace some variables, such as ssh username and
-private key, and the path to the script to run. The first line of the file defines an array of
+private key, and the path to the script to run. Alternatively, you can pass them on the command
+line with `--ssh-username` and `--ssh-private-key-path`. The first line of the file defines an array of
 managed servers that the `push` command will operate on.
 
 ```ruby
@@ -53,6 +54,17 @@ managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com )
 This works for Windows managed servers using WinRM as well
 
     $ vagrant orchestrate init --winrm [--winrm-username USERNAME --winrm-password PASSWORD]
+
+```ruby
+  required_plugins = %w( vagrant-managed-servers vagrant-winrm-s )
+
+...
+
+  config.vm.communicator = "winrm"
+  config.winrm.username = "{{YOUR_WINRM_USERNAME}}"
+  config.winrm.password = "{{YOUR_WINRM_PASSWORD}}"
+  config.winrm.transport = :sspinegotiate
+```
 
 This also supports a self-contained way to install plugins, just list them in the required_plugins section
 
@@ -95,6 +107,8 @@ For a full list of init options, run `vagrant orchestrate init --help`
 Go ahead and push changes to your managed servers, one at a time. Support for parallel deployments is planned.
 
     $ vagrant orchestrate push
+
+The push command is currently limited by convention to vagrant machines that start with the "managed-" prefix. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those, but be cautioned that `vagrant up`, `provision` and `destroy` will by default.
 
 You can run vagrant with increased verbosity if you run into problems
 
