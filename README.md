@@ -17,18 +17,82 @@ Initialize a Vagrantfile to orchestrate running a script on multiple managed ser
 
     $ vagrant orchestrate init --shell
 
+Which produces a simple default Vagrantfile that can push to managed servers:
+```ruby
+managed_servers = %w( )
+
+required_plugins = %w( vagrant-managed-servers )
+required_plugins.each do |plugin|
+  system "vagrant plugin install #{plugin}" unless Vagrant.has_plugin? plugin
+end
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", path: "{{YOUR_SCRIPT_PATH}}"
+  config.ssh.username = "{{YOUR_SSH_USERNAME}}"
+  config.ssh.private_key_path = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
+
+  managed_servers.each do |instance|
+    config.vm.define "managed-#{instance}" do |box|
+      box.vm.box = "tknerr/managed-server-dummy"
+      box.vm.box_url = "./dummy.box"
+      box.vm.provider :managed do |provider|
+        provider.server = instance
+      end
+    end
+  end
+end
+```
+
 You'll need to edit your Vagrantfile and replace some variables, such as ssh username and
-password, and the path to the script to run. The first line of the file defines an array of
+private key, and the path to the script to run. The first line of the file defines an array of
 managed servers that the `push` command will operate on.
 
-This works for Windows managed servers as well
+```ruby
+managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com ) 
+```
+
+This works for Windows managed servers using WinRM as well
 
     $ vagrant orchestrate init --winrm [--winrm-username USERNAME --winrm-password PASSWORD]
+
+This also supports a self-contained way to install plugins, just list them in the required_plugins section
+
+```ruby
+required_plugins = %w( vagrant-managed-servers vagrant-hostsupdater )
+```
+
+Experimental puppet templating support is available as well with the `--puppet` flag and associated options
+
+```ruby
+  required_plugins = %w( vagrant-managed-servers vagrant-librarian-puppet )
+
+  ...
+
+  config.librarian_puppet.placeholder_filename = ".gitignore"
+  config.vm.provision "puppet" do |puppet|
+    puppet.module_path = 'modules'
+    puppet.hiera_config_path = 'hiera.yaml'
+  end
+```
+
+The following files and folders will be placed in the current directory
+
+```
+Puppetfile
+Vagrantfile
+dummy.box
+hiera/
+  common.yaml
+hiera.yaml
+manifests/
+  default.pp
+modules/
+  .gitignore
+```
 
 For a full list of init options, run `vagrant orchestrate init --help`
 
 ### Pushing changes
-Go ahead and push changes to your managed servers
+Go ahead and push changes to your managed servers, one at a time. Support for parallel deployments is planned.
 
     $ vagrant orchestrate push
 
@@ -59,12 +123,6 @@ merge that feature into downstream environments to avoid conflicts.
 ## Development Tips
 
 You'll want Ruby v2.0.0* and bundler for developing changes.
-
-You can install bundler by running
-
-    $ gem install bundler
-
-Bundler documentation is available here (http://bundler.io/).
 
 During the course of development you'll want to run the code you're working on,
 not the version of Vagrant Orchestrate you've installed. In order to accomplish
