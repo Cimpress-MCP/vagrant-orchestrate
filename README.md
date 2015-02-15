@@ -3,8 +3,35 @@
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
 to already provisioned (non-elastic) servers on top of the excellent vagrant-managed-servers plugin.
 It features a powerful templating `init` command and is designed from the
-ground up to be cross-platform, with first class support for Windows,
-Linux, and Mac.
+ground up to be cross-platform, with first class support for **Windows,
+Linux, and Mac**.
+
+## Quick start
+
+```
+$ vagrant orchestrate init --shell --shell-inline "echo Hello" \
+  --servers myserver1.mydomain.com,myserver2.mydomain.com \
+  --ssh-username USERNAME --ssh-private-key-path PATH
+$ vagrant orchestrate push
+==> managed-myserver1.mydomain.com: Linking vagrant with managed server myserver1.mydomain.com
+==> managed-myserver1.mydomain.com:  -- Server: myserver1.mydomain.com
+==> managed-myserver1.mydomain.com: Rsyncing folder: ~/dev/demo => /vagrant
+==> managed-myserver1.mydomain.com: Running provisioner: shell...
+==> managed-myserver1.mydomain.com: Running: inline script
+==> managed-myserver1.mydomain.com: Hello
+==> managed-myserver1.mydomain.com: Unlinking vagrant from managed server myserver1.mydomain.com
+==> managed-myserver1.mydomain.com:  -- Server: myserver1.mydomain.com
+==> managed-myserver2.mydomain.com: Linking vagrant with managed server myserver2.mydomain.com
+==> managed-myserver2.mydomain.com:  -- Server: myserver2.mydomain.com
+==> managed-myserver2.mydomain.com: Rsyncing folder: ~/dev/demo => /vagrant
+==> managed-myserver2.mydomain.com: Running provisioner: shell...
+==> managed-myserver2.mydomain.com: Running: inline script
+==> managed-myserver2.mydomain.com: Hello
+==> managed-myserver2.mydomain.com: Unlinking vagrant from managed server myserver2.mydomain.com
+==> managed-myserver2.mydomain.com:  -- Server: myserver2.mydomain.com
+```
+
+This also works for Windows with the `--winrm --winrm-username --wirnm-password` parameters, but currently must be initiated from a Windows host.
 
 ## Usage
 
