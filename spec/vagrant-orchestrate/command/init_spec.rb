@@ -277,7 +277,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     describe "filter_managed_servers" do
       it "is set to true" do
         subject.execute
-        expect(iso_env.vagrantfile.config.orchestrate.filter_managed_commands).to be_true
+        expect(iso_env.vagrantfile.config.orchestrate.filter_managed_commands).to be true
       end
     end
   end
