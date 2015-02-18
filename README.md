@@ -150,7 +150,7 @@ You can run vagrant with increased verbosity if you run into problems
     $ vagrant orchestrate push --debug
 
 ## Filtering managed commands
-It can be easy to make mistakes if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider. 
+It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider. 
 
 ```ruby
   config.orchestrate.filter_managed_commands = true
