@@ -27,11 +27,11 @@ module VagrantPlugins
               @env.ui.info("Skipping machine #{machine.name}")
               next
             end
-            push(options)
+            push(machine, options)
           end
         end
 
-        def push(options)
+        def push(machine, options)
           ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
           begin
             machine.action(:up, options)
