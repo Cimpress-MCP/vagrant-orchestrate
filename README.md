@@ -53,13 +53,21 @@ required_plugins.each do |plugin|
   system "vagrant plugin install #{plugin}" unless Vagrant.has_plugin? plugin
 end
 Vagrant.configure("2") do |config|
+  # This disables up, provision, reload, and destroy for managed servers. Use
+  # `vagrant orchestrate push` to communicate with managed servers.
+  config.orchestrate.filter_managed_commands = true
+
   config.vm.provision "shell", path: "{{YOUR_SCRIPT_PATH}}"
   config.ssh.username = "{{YOUR_SSH_USERNAME}}"
   config.ssh.private_key_path = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
 
+  config.vm.define "local", primary: true do |local|
+    local.vm.box = "ubuntu/trusty64"
+  end
+
   managed_servers.each do |instance|
-    config.vm.define "managed-#{instance}" do |box|
-      box.vm.box = "tknerr/managed-server-dummy"
+    config.vm.define instance, autostart: false do |box|
+      box.vm.box = "managed-server-dummy"
       box.vm.box_url = "./dummy.box"
       box.vm.provider :managed do |provider|
         provider.server = instance
@@ -140,6 +148,13 @@ The push command is currently limited by convention to vagrant machines that sta
 You can run vagrant with increased verbosity if you run into problems
 
     $ vagrant orchestrate push --debug
+
+## Filtering managed commands
+It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider. 
+
+```ruby
+  config.orchestrate.filter_managed_commands = true
+```
 
 ## Branching strategy
 
