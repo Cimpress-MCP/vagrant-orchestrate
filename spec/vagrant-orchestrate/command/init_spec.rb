@@ -86,8 +86,9 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
       it "creates the default files" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("manifests")
-        expect(Dir.entries(File.join(iso_env.cwd, "manifests"))).to include("default.pp")
+        expect(Dir.entries(iso_env.cwd)).to include("puppet")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("manifests")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "manifests"))).to include("default.pp")
       end
     end
 
@@ -108,13 +109,13 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
       it "creates the modules directory and placeholder" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("modules")
-        expect(Dir.entries(File.join(iso_env.cwd, "modules"))).to include(".gitignore")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("modules")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "modules"))).to include(".gitignore")
       end
 
       it "creates the Puppetfile" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("Puppetfile")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("Puppetfile")
       end
 
       it "contains the plugin" do
@@ -137,14 +138,14 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--puppet", "--puppet-hiera"] }
       it "is passed into the Vagrantfile" do
         subject.execute
-        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.hiera_config_path).to eq("hiera.yaml")
+        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.hiera_config_path).to eq("puppet/hiera.yaml")
       end
 
       it "creates the file" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("hiera.yaml")
-        expect(Dir.entries(iso_env.cwd)).to include("hiera")
-        expect(Dir.entries(File.join(iso_env.cwd, "hiera"))).to include("common.yaml")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hiera.yaml")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hiera")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "hiera"))).to include("common.yaml")
       end
     end
   end
