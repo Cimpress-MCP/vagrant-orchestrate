@@ -103,24 +103,27 @@ module VagrantPlugins
           return unless argv
 
           if options[:provisioners].include? "puppet"
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
             if options[:puppet_librarian_puppet]
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
-              write_file "Puppetfile", contents, options
-              FileUtils.mkdir_p(File.join(@env.cwd, "modules"))
-              write_file(File.join(@env.cwd, "modules", ".gitignore"), "*", options)
+              write_file File.join("puppet", "Puppetfile"), contents, options
+              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
+              write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
               options[:plugins] << "vagrant-librarian-puppet"
             end
 
             if options[:puppet_hiera]
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
-              write_file("hiera.yaml", contents, options)
-              FileUtils.mkdir_p(File.join(@env.cwd, "hiera"))
+              write_file(File.join("puppet", "hiera.yaml"), contents, options)
+              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hiera"))
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
-              write_file(File.join(@env.cwd, "hiera", "common.yaml"), contents, options)
+              write_file(File.join(@env.cwd, "puppet", "hiera", "common.yaml"), contents, options)
             end
 
-            FileUtils.mkdir_p(File.join(@env.cwd, "manifests"))
-            write_file(File.join(@env.cwd, "manifests", "default.pp"), "# Your puppet code goes here", options)
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
+            write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
+                       "# Your puppet code goes here",
+                       options)
           end
 
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
