@@ -166,7 +166,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "includes the vagrant-winrm-s plugin"do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include("vagrant-winrm-s")        
+        expect(vagrantfile).to include("vagrant-winrm-s")
       end
     end
 
@@ -269,6 +269,15 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "winds up in the target directory" do
         subject.execute
         expect(Dir.entries(iso_env.cwd)).to include("dummy.box")
+      end
+    end
+  end
+
+  context "orchestrate config" do
+    describe "filter_managed_servers" do
+      it "is set to true" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.orchestrate.filter_managed_commands).to be_true
       end
     end
   end

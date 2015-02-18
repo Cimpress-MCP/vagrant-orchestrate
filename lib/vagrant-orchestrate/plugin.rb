@@ -1,3 +1,5 @@
+require "vagrant-orchestrate/action/filtermanaged"
+
 begin
   require "vagrant"
 rescue LoadError
@@ -18,12 +20,33 @@ module VagrantPlugins
       This plugin installs commands that make pushing changes to vagrant-managed-servers easy.
       DESC
 
+      config "orchestrate" do
+        require_relative "config"
+        Config
+      end
+
       command(:orchestrate) do
         setup_i18n
         setup_logging
 
         require_relative "command/root"
         Command::Root
+      end
+
+      action_hook(:orchestrate, :machine_action_up) do |hook|
+        hook.prepend Action::FilterManaged
+      end
+
+      action_hook(:orchestrate, :machine_action_provision) do |hook|
+        hook.prepend Action::FilterManaged
+      end
+
+      action_hook(:orchestrate, :machine_action_destroy) do |hook|
+        hook.prepend Action::FilterManaged
+      end
+
+      action_hook(:orchestrate, :machine_action_reload) do |hook|
+        hook.prepend Action::FilterManaged
       end
 
       # This initializes the internationalization strings.
