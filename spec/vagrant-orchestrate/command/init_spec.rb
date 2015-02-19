@@ -144,8 +144,20 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "creates the file" do
         subject.execute
         expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hiera.yaml")
-        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hiera")
-        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "hiera"))).to include("common.yaml")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hieradata")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "hieradata"))).to include("common.yaml")
+      end
+
+      describe "hiera.yaml" do
+        it "declares a datadir contains a common.yaml file" do
+          subject.execute
+          hiera_obj = YAML.load(File.read(File.join(iso_env.cwd, "puppet", "hiera.yaml")))
+          datadir = hiera_obj[:datadir]
+          expect(datadir).to start_with("/vagrant")
+          datadir_path = File.join(iso_env.cwd, datadir.sub("/vagrant/", ""))
+          expect(datadir_path).to satisfy { |path| Dir.exist?(path) }
+          expect(Dir.entries(datadir_path)).to include("common.yaml")
+        end
       end
     end
   end

@@ -115,9 +115,9 @@ module VagrantPlugins
             if options[:puppet_hiera]
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
               write_file(File.join("puppet", "hiera.yaml"), contents, options)
-              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hiera"))
+              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
               contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
-              write_file(File.join(@env.cwd, "puppet", "hiera", "common.yaml"), contents, options)
+              write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
             end
 
             FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
