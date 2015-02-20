@@ -83,8 +83,9 @@ line with `--ssh-username` and `--ssh-private-key-path`. The first line of the f
 managed servers that the `push` command will operate on.
 
 ```ruby
-managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com ) 
+managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com )
 ```
+#### Windows
 
 This works for Windows managed servers using WinRM as well
 
@@ -101,11 +102,97 @@ This works for Windows managed servers using WinRM as well
   config.winrm.transport = :sspinegotiate
 ```
 
+#### Plugins
+
 This also supports a self-contained way to install plugins, just list them in the required_plugins section
 
 ```ruby
 required_plugins = %w( vagrant-managed-servers vagrant-hostsupdater )
 ```
+
+#### Working with multiple environments
+It is a very common pattern in software development to have separate environments - e.g. dev, test, and prod.
+Vagrant Orchestrate offers a way to manage multiple environments using a combination of a single servers.json
+file and the name of the current git branch to know which the current environment is.
+
+```javascript
+# servers.json
+{
+  "environments": {
+    "dev": {
+      "servers": [
+        "dev.myapp.mydomain.com"
+      ]
+    },
+    "test": {
+      "servers": [
+        "test1.myapp.mydomain.com",
+        "test2.myapp.mydomain.com"
+      ]
+    },
+    "prod": {
+      "servers": [
+        "prod1.myapp.mydomain.com",
+        "prod2.myapp.mydomain.com",
+        "prod3.myapp.mydomain.com"
+      ]
+    }
+  }
+}
+```
+
+Add the following line to the top of your `Vagrantfile`
+
+```ruby
+managed_servers = VagrantPlugins::Orchestrate::Plugin.load_servers_for_branch
+```
+
+If you create git branches named `dev`, `test`, and `prod`, your vagrantfile will become environment aware and
+you'll only be able to see the servers appropriate for that environment.
+
+```
+$ git branch
+* dev
+  test
+  prod
+$ vagrant status
+Current machine states:
+
+local                     not created (virtualbox)
+dev.myapp.mydomain.com    not created (managed)
+
+$ git checkout test
+Switched to branch 'test'
+$ vagrant status
+Current machine states:
+
+local                     not created (virtualbox)
+test1.myapp.mydomain.com  not created (managed)
+test2.myapp.mydomain.com  not created (managed)
+
+$ git checkout prod
+Switched to branch 'prod'
+$ vagrant status
+Current machine states:
+
+local                     not created (virtualbox)
+prod1.myapp.mydomain.com  not created (managed)
+prod2.myapp.mydomain.com  not created (managed)
+prod3.myapp.mydomain.com  not created (managed)
+```
+
+Any branch that doesn't have a matching environment in the servers.json file will
+not list any managed servers.
+
+```
+$ git checkout -b my_feature_branch
+Switched to a new branch 'my_feature_branch'
+$ vagrant status
+Current machine states:
+
+local                     not created (virtualbox)
+```
+#### Puppet
 
 Experimental puppet templating support is available as well with the `--puppet` flag and associated options
 
@@ -150,7 +237,7 @@ You can run vagrant with increased verbosity if you run into problems
     $ vagrant orchestrate push --debug
 
 ## Filtering managed commands
-It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider. 
+It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider.
 
 ```ruby
   config.orchestrate.filter_managed_commands = true

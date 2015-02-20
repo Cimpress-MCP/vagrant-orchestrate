@@ -277,6 +277,24 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
   end
 
+  context "environments" do
+    let(:argv) { ["--environments", "a,b,c"] }
+    describe "vagrantfile" do
+      it "should contain the loading code" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("managed_servers = VagrantPlugins::Orchestrate::Plugin.load_servers_for_branch")
+      end
+    end
+
+    describe "servers.json" do
+      it "should exist in the target directory" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("servers.json")
+      end
+    end
+  end
+
   context "box" do
     describe "dummy.box" do
       it "winds up in the target directory" do

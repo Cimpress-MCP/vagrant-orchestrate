@@ -1,0 +1,11 @@
+{
+  "environments": {
+    <% environments.each_with_index do |environment, index| -%>
+    "<%= environment %>": {
+      "servers": [
+
+      ]
+    }<% if index < environments.length - 1 -%>,<% end -%>
+		<% end -%>
+  }
+}

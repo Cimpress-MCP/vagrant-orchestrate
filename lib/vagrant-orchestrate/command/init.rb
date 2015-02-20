@@ -15,12 +15,13 @@ module VagrantPlugins
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
 
           options[:provisioners] = []
           options[:servers] = []
+          options[:environments] = []
           options[:plugins] = DEFAULT_PLUGINS
           options[:puppet_librarian_puppet] = true
           options[:puppet_hiera] = true
@@ -90,8 +91,12 @@ module VagrantPlugins
               options[:plugins] += p
             end
 
-            o.on("--servers x,y,z", Array, "A comma separated list of servers hostnames or IPs to deploy to") do |list|
+            o.on("--servers x,y,z", Array, "A CSV list of FQDNs to target managed servers") do |list|
               options[:servers] = list
+            end
+
+            o.on("--environments x,y,z", Array, "A CSV list of environments. Take precedence over --servers") do |list|
+              options[:environments] = list
             end
 
             o.on("-f", "--force", "Force overwriting of files") do
@@ -126,6 +131,12 @@ module VagrantPlugins
                        options)
           end
 
+          if options[:environments].any?
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
+                                               environments: options[:environments])
+            write_file("servers.json", contents, options)
+          end
+
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
           options[:winrm_password] ||= DEFAULT_WINRM_PASSWORD
@@ -146,6 +157,7 @@ module VagrantPlugins
                                              ssh_password: options[:ssh_password],
                                              ssh_private_key_path: options[:ssh_private_key_path],
                                              servers: options[:servers],
+                                             environments: options[:environments],
                                              plugins: options[:plugins]
                                              )
           write_file("Vagrantfile", contents, options)
@@ -153,12 +165,25 @@ module VagrantPlugins
                        File.join(@env.cwd, "dummy.box"))
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
+          print_environment_instructions options[:environments]
+
           # Success, exit status 0
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         private
+
+        def print_environment_instructions(environments)
+          return if environments.empty?
+          @env.ui.info("You've created an environment aware configuration.")
+          @env.ui.info("To complete the process you need to do the following: ")
+          @env.ui.info(" 1. Add the target servers to servers.json")
+          @env.ui.info(" 2. Create a git branch for each environment")
+          environments.each do |env|
+            @env.ui.info("    git branch #{env}")
+          end
+        end
 
         def write_file(filename, contents, options)
           save_path = Pathname.new(filename).expand_path(@env.cwd)
