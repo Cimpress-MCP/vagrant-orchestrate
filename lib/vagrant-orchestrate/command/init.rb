@@ -15,12 +15,13 @@ module VagrantPlugins
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
 
           options[:provisioners] = []
           options[:servers] = []
+          options[:environments] = []
           options[:plugins] = DEFAULT_PLUGINS
           options[:puppet_librarian_puppet] = true
           options[:puppet_hiera] = true
@@ -90,8 +91,12 @@ module VagrantPlugins
               options[:plugins] += p
             end
 
-            o.on("--servers x,y,z", Array, "A comma separated list of servers hostnames or IPs to deploy to") do |list|
+            o.on("--servers x,y,z", Array, "A CSV list of FQDNs to target managed servers") do |list|
               options[:servers] = list
+            end
+
+            o.on("--environments x,y,z", Array, "A CSV list of environments. Takes precedence over --servers") do |list|
+              options[:environments] = list
             end
 
             o.on("-f", "--force", "Force overwriting of files") do
@@ -102,29 +107,8 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          if options[:provisioners].include? "puppet"
-            FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
-            if options[:puppet_librarian_puppet]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
-              write_file File.join("puppet", "Puppetfile"), contents, options
-              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
-              write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
-              options[:plugins] << "vagrant-librarian-puppet"
-            end
-
-            if options[:puppet_hiera]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
-              write_file(File.join("puppet", "hiera.yaml"), contents, options)
-              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
-              write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
-            end
-
-            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
-            write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
-                       "# Your puppet code goes here",
-                       options)
-          end
+          init_puppet options
+          init_environments options
 
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
@@ -146,6 +130,7 @@ module VagrantPlugins
                                              ssh_password: options[:ssh_password],
                                              ssh_private_key_path: options[:ssh_private_key_path],
                                              servers: options[:servers],
+                                             environments: options[:environments],
                                              plugins: options[:plugins]
                                              )
           write_file("Vagrantfile", contents, options)
@@ -156,9 +141,50 @@ module VagrantPlugins
           # Success, exit status 0
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         private
+
+        def init_puppet(options)
+          return unless options[:provisioners].include? "puppet"
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
+          if options[:puppet_librarian_puppet]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
+            write_file File.join("puppet", "Puppetfile"), contents, options
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
+            write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
+            options[:plugins] << "vagrant-librarian-puppet"
+          end
+
+          if options[:puppet_hiera]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
+            write_file(File.join("puppet", "hiera.yaml"), contents, options)
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
+            write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
+          end
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
+          write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
+                     "# Your puppet code goes here", options)
+        end
+
+        def init_environments(options)
+          environments = options[:environments]
+          return unless environments.any?
+
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
+                                             environments: environments)
+          write_file("servers.json", contents, options)
+          @env.ui.info("You've created an environment aware configuration.")
+          @env.ui.info("To complete the process you need to do the following: ")
+          @env.ui.info(" 1. Add the target servers to servers.json")
+          @env.ui.info(" 2. Create a git branch for each environment")
+          environments.each do |env|
+            @env.ui.info("    git branch #{env}")
+          end
+        end
 
         def write_file(filename, contents, options)
           save_path = Pathname.new(filename).expand_path(@env.cwd)

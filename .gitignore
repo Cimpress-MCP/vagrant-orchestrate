@@ -16,3 +16,4 @@ mkmf.log
 /.vagrant/
 Vagrantfile
 .DS_Store
+servers.json

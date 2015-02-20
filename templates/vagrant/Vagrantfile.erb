@@ -1,4 +1,8 @@
+<% if environments.any? -%>
+managed_servers = VagrantPlugins::Orchestrate::Plugin.load_servers_for_branch
+<% else -%>
 managed_servers = %w( <% servers.each do |s| -%><%= s %> <% end -%>)
+<% end -%>
 
 <% if plugins.any? -%>
 required_plugins = %w( <% plugins.each do |p| -%><%= p %> <% end -%>)
