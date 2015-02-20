@@ -152,7 +152,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         it "declares a datadir contains a common.yaml file" do
           subject.execute
           hiera_obj = YAML.load(File.read(File.join(iso_env.cwd, "puppet", "hiera.yaml")))
-          datadir = hiera_obj[:datadir]
+          datadir = hiera_obj[:yaml][:datadir]
           expect(datadir).to start_with("/vagrant")
           datadir_path = File.join(iso_env.cwd, datadir.sub("/vagrant/", ""))
           expect(datadir_path).to satisfy { |path| Dir.exist?(path) }
