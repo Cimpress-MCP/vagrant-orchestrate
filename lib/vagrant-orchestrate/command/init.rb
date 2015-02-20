@@ -95,7 +95,7 @@ module VagrantPlugins
               options[:servers] = list
             end
 
-            o.on("--environments x,y,z", Array, "A CSV list of environments. Take precedence over --servers") do |list|
+            o.on("--environments x,y,z", Array, "A CSV list of environments. Takes precedence over --servers") do |list|
               options[:environments] = list
             end
 
