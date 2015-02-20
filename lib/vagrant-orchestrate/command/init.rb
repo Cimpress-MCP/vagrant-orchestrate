@@ -107,35 +107,8 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          if options[:provisioners].include? "puppet"
-            FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
-            if options[:puppet_librarian_puppet]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
-              write_file File.join("puppet", "Puppetfile"), contents, options
-              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
-              write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
-              options[:plugins] << "vagrant-librarian-puppet"
-            end
-
-            if options[:puppet_hiera]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
-              write_file(File.join("puppet", "hiera.yaml"), contents, options)
-              FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
-              write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
-            end
-
-            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
-            write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
-                       "# Your puppet code goes here",
-                       options)
-          end
-
-          if options[:environments].any?
-            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
-                                               environments: options[:environments])
-            write_file("servers.json", contents, options)
-          end
+          init_puppet options
+          init_environments options
 
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
@@ -165,8 +138,6 @@ module VagrantPlugins
                        File.join(@env.cwd, "dummy.box"))
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
-          print_environment_instructions options[:environments]
-
           # Success, exit status 0
           0
         end
@@ -174,8 +145,38 @@ module VagrantPlugins
 
         private
 
-        def print_environment_instructions(environments)
-          return if environments.empty?
+        def init_puppet(options)
+          return unless options[:provisioners].include? "puppet"
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
+          if options[:puppet_librarian_puppet]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
+            write_file File.join("puppet", "Puppetfile"), contents, options
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
+            write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
+            options[:plugins] << "vagrant-librarian-puppet"
+          end
+
+          if options[:puppet_hiera]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
+            write_file(File.join("puppet", "hiera.yaml"), contents, options)
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
+            write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
+          end
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
+          write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
+                     "# Your puppet code goes here", options)
+        end
+
+        def init_environments(options)
+          environments = options[:environments]
+          return unless environments.any?
+
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
+                                             environments: environments)
+          write_file("servers.json", contents, options)
           @env.ui.info("You've created an environment aware configuration.")
           @env.ui.info("To complete the process you need to do the following: ")
           @env.ui.info(" 1. Add the target servers to servers.json")
