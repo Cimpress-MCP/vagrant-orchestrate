@@ -208,7 +208,7 @@ Experimental puppet templating support is available as well with the `--puppet` 
   end
 ```
 
-The following files and folders will be placed in the current directory
+The following files and folders will be placed in the puppet directory
 
 ```
 Puppetfile

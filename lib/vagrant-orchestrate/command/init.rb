@@ -180,7 +180,8 @@ module VagrantPlugins
           @env.ui.info("You've created an environment aware configuration.")
           @env.ui.info("To complete the process you need to do the following: ")
           @env.ui.info(" 1. Add the target servers to servers.json")
-          @env.ui.info(" 2. Create a git branch for each environment")
+          @env.ui.info(" 2. Commit your changes")
+          @env.ui.info(" 3. Create a git branch for each environment")
           environments.each do |env|
             @env.ui.info("    git branch #{env}")
           end
