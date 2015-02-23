@@ -97,6 +97,7 @@ module VagrantPlugins
             @logger.debug("Read git branch #{git_branch} using `#{command}`")
           end
         end
+        ENV["VAGRANT_ORCHESTRATE_GIT_BRANCH"] = git_branch
         git_branch
       end
 
