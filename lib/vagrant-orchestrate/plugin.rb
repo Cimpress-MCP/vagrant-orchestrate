@@ -88,7 +88,7 @@ module VagrantPlugins
           git_branch = ENV["GIT_BRANCH"]
           @logger.debug("Read git branch #{git_branch} from GIT_BRANCH environment variable")
         else
-          command = "git rev-parse --abbrev-ref HEAD"
+          command = "git rev-parse --abbrev-ref HEAD 2>&1"
           git_branch = `#{command}`.chomp
           if git_branch.include? "fatal"
             @logger.error("Unable to determine git branch `#{command}`. Is this a git repo?")
