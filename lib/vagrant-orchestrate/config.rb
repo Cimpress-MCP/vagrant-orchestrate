@@ -1,16 +1,75 @@
 require "vagrant"
+require "yaml"
 
 module VagrantPlugins
   module Orchestrate
     class Config < Vagrant.plugin(2, :config)
       attr_accessor :filter_managed_commands
+      attr_accessor :credentials
 
       def initialize
         @filter_managed_commands = UNSET_VALUE
+        @credentials = UNSET_VALUE
+      end
+
+      def credentials
+        @credentials = Credentials.new if @credentials == UNSET_VALUE
+        yield @credentials if @credentials && block_given?
+        @credentials
+      end
+
+      # It was a little hard to dig up, but this method gets called on the more general
+      # config object, with the more specific config as the argument.
+      # https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/config/v2/loader.rb
+      def merge(new_config)
+        super.tap do |result|
+          result.credentials = @credentials.merge(new_config.credentials) unless @credentials == UNSET_VALUE
+        end
       end
 
       def finalize!
         @filter_managed_commands = false if @filter_managed_commands == UNSET_VALUE
+        @credentials = nil if @credentials == UNSET_VALUE
+        @credentials.finalize! if @credentials
+      end
+
+      class Credentials
+        # Same as Vagrant does to distinguish uninitialized variables and intentional assignments
+        # to Ruby's nil, we just have to define ourselves because we're in different scope
+        UNSET_VALUE = ::Vagrant::Plugin::V2::Config::UNSET_VALUE
+
+        attr_accessor :prompt
+        attr_accessor :creds_file_path
+        attr_accessor :username
+        attr_accessor :password
+
+        def initialize
+          @prompt = UNSET_VALUE
+          @creds_file_path = UNSET_VALUE
+          @username = UNSET_VALUE
+          @password = UNSET_VALUE
+        end
+
+        # Merge needs to be implemented here because this class doesn't get to
+        # to extend Vagrant.plugin(2, :config), and not having standard vagrant
+        # merge behavior would be pretty surprising
+        def merge(new_config)
+          result = dup
+          unless new_config == UNSET_VALUE
+            result.prompt = new_config.prompt unless new_config.prompt == UNSET_VALUE
+            result.creds_file_path = new_config.creds_file_path unless new_config.creds_file_path == UNSET_VALUE
+            result.username = new_config.username unless new_config.username == UNSET_VALUE
+            result.password = new_config.password unless new_config.password == UNSET_VALUE
+          end
+          result
+        end
+
+        def finalize!
+          @prompt = nil if @prompt == UNSET_VALUE
+          @creds_file_path = nil if @creds_file_path == UNSET_VALUE
+          @username = nil if @username == UNSET_VALUE
+          @password = nil if @password == UNSET_VALUE
+        end
       end
     end
   end
