@@ -23,7 +23,11 @@ module VagrantPlugins
       # https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/config/v2/loader.rb
       def merge(new_config)
         super.tap do |result|
-          result.credentials = @credentials.merge(new_config.credentials) unless @credentials == UNSET_VALUE
+          if @credentials == UNSET_VALUE
+            result.credentials = new_config.credentials.dup
+          else
+            result.credentials = @credentials.merge(new_config.credentials)
+          end
         end
       end
 
