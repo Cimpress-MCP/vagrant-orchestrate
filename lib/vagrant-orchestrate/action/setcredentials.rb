@@ -68,7 +68,7 @@ Continuing with default credentials."
         end
 
         def check_creds_file(config_creds)
-          file_path = config_creds.creds_file_path
+          file_path = config_creds.file_path
           return unless file_path
           unless File.exist?(file_path)
             @ui.info "Credential file not found at #{file_path}. Prompting user for credentials."
