@@ -106,6 +106,11 @@ module VagrantPlugins
             o.on("--credentials-prompt", "Prompt for credentials when performing orchestrate operations") do
               options[:creds_prompt] = true
             end
+
+            cfpmsg = "The path to a yaml file containing :username and :password fields to use with vagrant orchestrate"
+            o.on("--credentials-file-path FILEPATH", String, cfpmsg) do |file_path|
+              options[:creds_file_path] = file_path
+            end
           end
 
           argv = parse_options(opts)
