@@ -15,10 +15,10 @@ Vagrant.configure("2") do |config|
   # `vagrant orchestrate push` to communicate with managed servers.
   config.orchestrate.filter_managed_commands = true
   <% if creds_prompt -%>
-  config.orchestrate.credentials { |creds| creds.prompt = true }
+  config.orchestrate.credentials.prompt = true
   <% end -%>
   <% if creds_file_path -%>
-  config.orchestrate.credentials { |creds| creds.file_path = "<%= creds_file_path%>" }
+  config.orchestrate.credentials.file_path = "<%= creds_file_path%>"
   <% end -%>
 
   <% if provisioners.include? "shell" -%>

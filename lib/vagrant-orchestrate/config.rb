@@ -9,14 +9,11 @@ module VagrantPlugins
 
       def initialize
         @filter_managed_commands = UNSET_VALUE
-        @credentials = UNSET_VALUE
+        @credentials = Credentials.new
       end
 
       def credentials
-        if block_given?
-          @credentials = Credentials.new if @credentials == UNSET_VALUE
-          yield @credentials if @credentials
-        end
+        yield @credentials if block_given?
         @credentials
       end
 
@@ -25,9 +22,9 @@ module VagrantPlugins
       # https://github.com/mitchellh/vagrant/blob/master/lib/vagrant/config/v2/loader.rb
       def merge(new_config)
         super.tap do |result|
-          if new_config.credentials == UNSET_VALUE
+          if new_config.credentials.unset?
             result.credentials = @credentials
-          elsif @credentials == UNSET_VALUE
+          elsif @credentials.unset?
             result.credentials = new_config.credentials
           else
             result.credentials = @credentials.merge(new_config.credentials)
@@ -37,7 +34,7 @@ module VagrantPlugins
 
       def finalize!
         @filter_managed_commands = false if @filter_managed_commands == UNSET_VALUE
-        @credentials = nil if @credentials == UNSET_VALUE
+        @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end
 
@@ -56,6 +53,31 @@ module VagrantPlugins
           @file_path = UNSET_VALUE
           @username = UNSET_VALUE
           @password = UNSET_VALUE
+          @unset = true
+        end
+
+        def prompt=(value)
+          @unset = false
+          @prompt = value
+        end
+
+        def file_path=(value)
+          @unset = false
+          @file_path = value
+        end
+
+        def username=(value)
+          @unset = false
+          @username = value
+        end
+
+        def password=(value)
+          @unset = false
+          @password = value
+        end
+
+        def unset?
+          @unset
         end
 
         # Merge needs to be implemented here because this class doesn't get to
@@ -63,7 +85,7 @@ module VagrantPlugins
         # if credentials configuration defined at different levels couldn't be merged
         def merge(new_config)
           result = dup
-          unless new_config == UNSET_VALUE
+          unless new_config.unset?
             result.prompt = new_config.prompt unless new_config.prompt == UNSET_VALUE
             result.file_path = new_config.file_path unless new_config.file_path == UNSET_VALUE
             result.username = new_config.username unless new_config.username == UNSET_VALUE
