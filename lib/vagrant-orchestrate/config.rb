@@ -53,31 +53,11 @@ module VagrantPlugins
           @file_path = UNSET_VALUE
           @username = UNSET_VALUE
           @password = UNSET_VALUE
-          @unset = true
-        end
-
-        def prompt=(value)
-          @unset = false
-          @prompt = value
-        end
-
-        def file_path=(value)
-          @unset = false
-          @file_path = value
-        end
-
-        def username=(value)
-          @unset = false
-          @username = value
-        end
-
-        def password=(value)
-          @unset = false
-          @password = value
+          @unset = nil
         end
 
         def unset?
-          @unset
+          @unset || [@prompt, @file_path, @username, @password] == [UNSET_VALUE, UNSET_VALUE, UNSET_VALUE, UNSET_VALUE]
         end
 
         # Merge needs to be implemented here because this class doesn't get to
@@ -95,6 +75,7 @@ module VagrantPlugins
         end
 
         def finalize!
+          @unset = unset?
           @prompt = nil if @prompt == UNSET_VALUE
           @file_path = nil if @file_path == UNSET_VALUE
           @username = nil if @username == UNSET_VALUE
