@@ -1,4 +1,5 @@
 require "vagrant-orchestrate/action/filtermanaged"
+require "vagrant-orchestrate/action/setcredentials"
 
 begin
   require "vagrant"
@@ -35,18 +36,22 @@ module VagrantPlugins
 
       action_hook(:orchestrate, :machine_action_up) do |hook|
         hook.prepend Action::FilterManaged
+        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_provision) do |hook|
         hook.prepend Action::FilterManaged
+        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_destroy) do |hook|
         hook.prepend Action::FilterManaged
+        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_reload) do |hook|
         hook.prepend Action::FilterManaged
+        hook.prepend Action::SetCredentials
       end
 
       # This initializes the internationalization strings.

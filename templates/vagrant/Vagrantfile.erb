@@ -14,6 +14,12 @@ Vagrant.configure("2") do |config|
   # This disables up, provision, reload, and destroy for managed servers. Use
   # `vagrant orchestrate push` to communicate with managed servers.
   config.orchestrate.filter_managed_commands = true
+  <% if creds_prompt -%>
+  config.orchestrate.credentials.prompt = true
+  <% end -%>
+  <% if creds_file_path -%>
+  config.orchestrate.credentials.file_path = "<%= creds_file_path%>"
+  <% end -%>
 
   <% if provisioners.include? "shell" -%>
   <% shell_paths.each do |path| -%>

@@ -192,6 +192,34 @@ Current machine states:
 
 local                     not created (virtualbox)
 ```
+
+#### Credentials
+
+Vagrant orchestrate offers the capability to prompt for credentials from the command
+line at the time of a push. You can initialize your Vagrantfile to declare this
+by passing the `--credentials-prompt` flag to the `vagrant orchestrate init` command,
+or add the following to your Vagrantfile.
+
+```ruby
+Vagrant.configure("2") do |config|
+
+  ...
+
+  config.orchestrate.credentials do |creds|
+    creds.prompt = true
+  end
+```
+
+The credentials config object can accept one additional parameter, `file_path`. Setting
+`creds.file_path = path/to/username_password.yaml` tells vagrant-orchestrate to
+look for a file at the given path, and read from its :username and :password fields
+('username' and 'password' are also accepted). Additionally, you can pass the username
+and password in using the `VAGRANT_ORCHESTRATE_USERNAME` and `VAGRANT_ORCHESTRATE_PASSWORD`
+environment variables. Environment variables take precedence over the file, and the file
+takes precedence over the prompting. It is possible to set `prompt` to `false`, or leave
+it unset, in which case only environment variables and the credentials file (if provided)
+will be checked.
+
 #### Puppet
 
 Experimental puppet templating support is available as well with the `--puppet` flag and associated options

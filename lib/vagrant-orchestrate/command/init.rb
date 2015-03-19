@@ -41,7 +41,7 @@ module VagrantPlugins
             end
 
             o.on("--shell-paths x,y,z", Array,
-                 "Comma separated list of shell scripts to run on provision. Only with --shell") do |list|
+                 "Comma-separated list of shell scripts to run on provision. Only with --shell") do |list|
               options[:shell_paths] = list
             end
 
@@ -66,7 +66,7 @@ module VagrantPlugins
               options[:ssh_username] = u
             end
 
-            o.on("--ssh-password PASSWORD", String, "The username for communicating over ssh") do |p|
+            o.on("--ssh-password PASSWORD", String, "The password for communicating over ssh") do |p|
               options[:ssh_password] = p
             end
 
@@ -102,6 +102,15 @@ module VagrantPlugins
             o.on("-f", "--force", "Force overwriting of files") do
               options[:force] = true
             end
+
+            o.on("--credentials-prompt", "Prompt for credentials when performing orchestrate operations") do
+              options[:creds_prompt] = true
+            end
+
+            cfpmsg = "The path to a yaml file containing :username and :password fields to use with vagrant orchestrate"
+            o.on("--credentials-file-path FILEPATH", String, cfpmsg) do |file_path|
+              options[:creds_file_path] = file_path
+            end
           end
 
           argv = parse_options(opts)
@@ -131,7 +140,8 @@ module VagrantPlugins
                                              ssh_private_key_path: options[:ssh_private_key_path],
                                              servers: options[:servers],
                                              environments: options[:environments],
-                                             plugins: options[:plugins]
+                                             plugins: options[:plugins],
+                                             creds_prompt: options[:creds_prompt]
                                              )
           write_file("Vagrantfile", contents, options)
           FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
@@ -177,8 +187,8 @@ module VagrantPlugins
           contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
                                              environments: environments)
           write_file("servers.json", contents, options)
-          @env.ui.info("You've created an environment aware configuration.")
-          @env.ui.info("To complete the process you need to do the following: ")
+          @env.ui.info("You've created an environment-aware configuration.")
+          @env.ui.info("To complete the process, you need to do the following: ")
           @env.ui.info(" 1. Add the target servers to servers.json")
           @env.ui.info(" 2. Commit your changes")
           @env.ui.info(" 3. Create a git branch for each environment")
