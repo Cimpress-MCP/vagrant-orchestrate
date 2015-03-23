@@ -22,16 +22,24 @@ module VagrantPlugins
           # Parse the options
           argv = parse_options(opts)
 
-          with_target_vms(argv, provider: :managed) do |machine|
-            unless machine.name.to_s.start_with? "managed-"
-              @logger.debug("Skipping machine #{machine.name}")
+          with_target_vms(argv) do |machine|
+            unless machine.provider_name.to_sym == :managed
+              @env.ui.info("Skipping machine #{machine.name}")
               next
             end
+            push(machine, options)
+          end
+        end
 
+        def push(machine, options)
+          ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
+          begin
             machine.action(:up, options)
             machine.action(:provision, options)
             machine.action(:reload, options) if options[:reboot]
             machine.action(:destroy, options)
+          ensure
+            ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
           end
         end
       end

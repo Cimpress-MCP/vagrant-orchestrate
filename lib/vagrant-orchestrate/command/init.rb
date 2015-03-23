@@ -15,12 +15,13 @@ module VagrantPlugins
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-managed-servers"]
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
 
           options[:provisioners] = []
           options[:servers] = []
+          options[:environments] = []
           options[:plugins] = DEFAULT_PLUGINS
           options[:puppet_librarian_puppet] = true
           options[:puppet_hiera] = true
@@ -40,7 +41,7 @@ module VagrantPlugins
             end
 
             o.on("--shell-paths x,y,z", Array,
-                 "Comma separated list of shell scripts to run on provision. Only with --shell") do |list|
+                 "Comma-separated list of shell scripts to run on provision. Only with --shell") do |list|
               options[:shell_paths] = list
             end
 
@@ -65,7 +66,7 @@ module VagrantPlugins
               options[:ssh_username] = u
             end
 
-            o.on("--ssh-password PASSWORD", String, "The username for communicating over ssh") do |p|
+            o.on("--ssh-password PASSWORD", String, "The password for communicating over ssh") do |p|
               options[:ssh_password] = p
             end
 
@@ -90,38 +91,33 @@ module VagrantPlugins
               options[:plugins] += p
             end
 
-            o.on("--servers x,y,z", Array, "A comma separated list of servers hostnames or IPs to deploy to") do |list|
+            o.on("--servers x,y,z", Array, "A CSV list of FQDNs to target managed servers") do |list|
               options[:servers] = list
+            end
+
+            o.on("--environments x,y,z", Array, "A CSV list of environments. Takes precedence over --servers") do |list|
+              options[:environments] = list
             end
 
             o.on("-f", "--force", "Force overwriting of files") do
               options[:force] = true
+            end
+
+            o.on("--credentials-prompt", "Prompt for credentials when performing orchestrate operations") do
+              options[:creds_prompt] = true
+            end
+
+            cfpmsg = "The path to a yaml file containing :username and :password fields to use with vagrant orchestrate"
+            o.on("--credentials-file-path FILEPATH", String, cfpmsg) do |file_path|
+              options[:creds_file_path] = file_path
             end
           end
 
           argv = parse_options(opts)
           return unless argv
 
-          if options[:provisioners].include? "puppet"
-            if options[:puppet_librarian_puppet]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
-              write_file "Puppetfile", contents, options
-              FileUtils.mkdir_p(File.join(@env.cwd, "modules"))
-              write_file(File.join(@env.cwd, "modules", ".gitignore"), "*", options)
-              options[:plugins] << "vagrant-librarian-puppet"
-            end
-
-            if options[:puppet_hiera]
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
-              write_file("hiera.yaml", contents, options)
-              FileUtils.mkdir_p(File.join(@env.cwd, "hiera"))
-              contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
-              write_file(File.join(@env.cwd, "hiera", "common.yaml"), contents, options)
-            end
-
-            FileUtils.mkdir_p(File.join(@env.cwd, "manifests"))
-            write_file(File.join(@env.cwd, "manifests", "default.pp"), "# Your puppet code goes here", options)
-          end
+          init_puppet options
+          init_environments options
 
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
@@ -143,7 +139,9 @@ module VagrantPlugins
                                              ssh_password: options[:ssh_password],
                                              ssh_private_key_path: options[:ssh_private_key_path],
                                              servers: options[:servers],
-                                             plugins: options[:plugins]
+                                             environments: options[:environments],
+                                             plugins: options[:plugins],
+                                             creds_prompt: options[:creds_prompt]
                                              )
           write_file("Vagrantfile", contents, options)
           FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
@@ -153,9 +151,51 @@ module VagrantPlugins
           # Success, exit status 0
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         private
+
+        def init_puppet(options)
+          return unless options[:provisioners].include? "puppet"
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet"))
+          if options[:puppet_librarian_puppet]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
+            write_file File.join("puppet", "Puppetfile"), contents, options
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
+            write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
+            options[:plugins] << "vagrant-librarian-puppet"
+          end
+
+          if options[:puppet_hiera]
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera.yaml"))
+            write_file(File.join("puppet", "hiera.yaml"), contents, options)
+            FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "hieradata"))
+            contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/hiera/common.yaml"))
+            write_file(File.join(@env.cwd, "puppet", "hieradata", "common.yaml"), contents, options)
+          end
+
+          FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "manifests"))
+          write_file(File.join(@env.cwd, "puppet", "manifests", "default.pp"),
+                     "# Your puppet code goes here", options)
+        end
+
+        def init_environments(options)
+          environments = options[:environments]
+          return unless environments.any?
+
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/environment/servers.json"),
+                                             environments: environments)
+          write_file("servers.json", contents, options)
+          @env.ui.info("You've created an environment-aware configuration.")
+          @env.ui.info("To complete the process, you need to do the following: ")
+          @env.ui.info(" 1. Add the target servers to servers.json")
+          @env.ui.info(" 2. Commit your changes")
+          @env.ui.info(" 3. Create a git branch for each environment")
+          environments.each do |env|
+            @env.ui.info("    git branch #{env}")
+          end
+        end
 
         def write_file(filename, contents, options)
           save_path = Pathname.new(filename).expand_path(@env.cwd)

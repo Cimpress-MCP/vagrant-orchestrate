@@ -86,8 +86,9 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
       it "creates the default files" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("manifests")
-        expect(Dir.entries(File.join(iso_env.cwd, "manifests"))).to include("default.pp")
+        expect(Dir.entries(iso_env.cwd)).to include("puppet")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("manifests")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "manifests"))).to include("default.pp")
       end
     end
 
@@ -108,13 +109,13 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
       it "creates the modules directory and placeholder" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("modules")
-        expect(Dir.entries(File.join(iso_env.cwd, "modules"))).to include(".gitignore")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("modules")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "modules"))).to include(".gitignore")
       end
 
       it "creates the Puppetfile" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("Puppetfile")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("Puppetfile")
       end
 
       it "contains the plugin" do
@@ -137,14 +138,26 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--puppet", "--puppet-hiera"] }
       it "is passed into the Vagrantfile" do
         subject.execute
-        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.hiera_config_path).to eq("hiera.yaml")
+        expect(iso_env.vagrantfile.config.vm.provisioners.first.config.hiera_config_path).to eq("puppet/hiera.yaml")
       end
 
       it "creates the file" do
         subject.execute
-        expect(Dir.entries(iso_env.cwd)).to include("hiera.yaml")
-        expect(Dir.entries(iso_env.cwd)).to include("hiera")
-        expect(Dir.entries(File.join(iso_env.cwd, "hiera"))).to include("common.yaml")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hiera.yaml")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet"))).to include("hieradata")
+        expect(Dir.entries(File.join(iso_env.cwd, "puppet", "hieradata"))).to include("common.yaml")
+      end
+
+      describe "hiera.yaml" do
+        it "declares a datadir contains a common.yaml file" do
+          subject.execute
+          hiera_obj = YAML.load(File.read(File.join(iso_env.cwd, "puppet", "hiera.yaml")))
+          datadir = hiera_obj[:yaml][:datadir]
+          expect(datadir).to start_with("/vagrant")
+          datadir_path = File.join(iso_env.cwd, datadir.sub("/vagrant/", ""))
+          expect(datadir_path).to satisfy { |path| Dir.exist?(path) }
+          expect(Dir.entries(datadir_path)).to include("common.yaml")
+        end
       end
     end
   end
@@ -166,7 +179,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "includes the vagrant-winrm-s plugin"do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include("vagrant-winrm-s")        
+        expect(vagrantfile).to include("vagrant-winrm-s")
       end
     end
 
@@ -264,11 +277,38 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
   end
 
+  context "environments" do
+    let(:argv) { ["--environments", "a,b,c"] }
+    describe "vagrantfile" do
+      it "should contain the loading code" do
+        subject.execute
+        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        expect(vagrantfile).to include("managed_servers = VagrantPlugins::Orchestrate::Plugin.load_servers_for_branch")
+      end
+    end
+
+    describe "servers.json" do
+      it "should exist in the target directory" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include("servers.json")
+      end
+    end
+  end
+
   context "box" do
     describe "dummy.box" do
       it "winds up in the target directory" do
         subject.execute
         expect(Dir.entries(iso_env.cwd)).to include("dummy.box")
+      end
+    end
+  end
+
+  context "orchestrate config" do
+    describe "filter_managed_servers" do
+      it "is set to true" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.orchestrate.filter_managed_commands).to be true
       end
     end
   end
