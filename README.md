@@ -260,14 +260,14 @@ Go ahead and push changes to your managed servers, in serial by default.
 
 The push command is currently limited by convention to vagrant machines that use the `:managed` provider. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those.
 
-#### Parallel
+#### Deployment Strategy
+
+Vagrant Orchestrate supports several deployment [strategies](docs/strategies.md), including parallel and
+blue-green.
+
 You can push changes to all of your servers in parallel with
 
-    $ vagrant orchestrate push --parallel
-
-You can run vagrant with increased verbosity if you run into problems
-
-    $ vagrant orchestrate push --debug
+    $ vagrant orchestrate push --strategy parallel
 
 ## Filtering managed commands
 It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider.
