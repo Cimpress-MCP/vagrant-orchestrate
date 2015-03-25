@@ -48,7 +48,7 @@ module VagrantPlugins
             if machine.provider_name.to_sym == :managed
               machines << machine
             else
-              @logger.debug("Skipping #{machine.name.to_s} because it doesn't use the :managed provider")
+              @logger.debug("Skipping #{machine.name} because it doesn't use the :managed provider")
             end
           end
 
@@ -95,7 +95,7 @@ module VagrantPlugins
         def deploy(options, *groups)
           groups.each_with_index do |machines, index|
             @logger.debug("Orchestrating push to group number #{index + 1} of #{groups.size}.")
-            @logger.debug(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(",")}")
+            @logger.debug(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(',')}")
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
               batchify(machines, :up, options)
