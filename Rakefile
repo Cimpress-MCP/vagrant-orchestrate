@@ -6,3 +6,4 @@ RuboCop::RakeTask.new
 RSpec::Core::RakeTask.new(:spec)
 
 task build: ["rubocop:auto_correct", :spec]
+task default: :build

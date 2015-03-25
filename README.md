@@ -254,15 +254,20 @@ modules/
 For a full list of init options, run `vagrant orchestrate init --help`
 
 ### Pushing changes
-Go ahead and push changes to your managed servers, one at a time. Support for parallel deployments is planned.
+Go ahead and push changes to your managed servers, in serial by default.
 
     $ vagrant orchestrate push
 
-The push command is currently limited by convention to vagrant machines that start with the "managed-" prefix. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those, but be cautioned that `vagrant up`, `provision` and `destroy` will by default.
+The push command is currently limited by convention to vagrant machines that use the `:managed` provider. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those.
 
-You can run vagrant with increased verbosity if you run into problems
+#### Deployment Strategy
 
-    $ vagrant orchestrate push --debug
+Vagrant Orchestrate supports several deployment [strategies](docs/strategies.md), including parallel and
+blue-green.
+
+You can push changes to all of your servers in parallel with
+
+    $ vagrant orchestrate push --strategy parallel
 
 ## Filtering managed commands
 It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider.
