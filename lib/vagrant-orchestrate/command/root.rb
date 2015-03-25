@@ -6,8 +6,7 @@ module VagrantPlugins
     module Command
       class Root < Vagrant.plugin(2, :command)
         def self.synopsis
-          'Orchestrates provsioning of managed servers. Useful for deploying changes \
-          repeatedly across multiple managed environments'
+          'Orchestrate provsioning of managed servers across environments'
         end
 
         def initialize(argv, env)

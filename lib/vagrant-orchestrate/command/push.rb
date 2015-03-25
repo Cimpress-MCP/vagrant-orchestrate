@@ -20,7 +20,7 @@ module VagrantPlugins
               options[:reboot] = true
             end
 
-            o.on("--[no-]parallel", "Execution machine provisioning in parallel. Default is false") do |v|
+            o.on("--[no-]parallel", "Execute machine provisioning in parallel. Default is false") do |v|
               options[:parallel] = v
             end
           end
