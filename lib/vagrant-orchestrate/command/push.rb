@@ -28,7 +28,7 @@ module VagrantPlugins
               options[:reboot] = true
             end
 
-            o.on("--strategy STRATEGY", "The deployment strategy to use. Default is serial") do |v|
+            o.on("--strategy strategy", "The deployment strategy to use. Default is serial") do |v|
               options[:strategy] = v
             end
 
