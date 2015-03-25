@@ -15,6 +15,8 @@ module VagrantPlugins
       class Push < Vagrant.plugin("2", :command)
         include Vagrant::Util
 
+        @logger = Log4r::Logger.new("vagrant_orchestrate::command::push")
+
         # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
@@ -28,7 +30,7 @@ module VagrantPlugins
               options[:reboot] = true
             end
 
-            o.on("--strategy strategy", "The deployment strategy to use. Default is serial") do |v|
+            o.on("--strategy strategy", "The orchestration strategy to use. Default is serial") do |v|
               options[:strategy] = v
             end
 
@@ -43,7 +45,11 @@ module VagrantPlugins
 
           machines = []
           with_target_vms(argv) do |machine|
-            machines << machine if machine.provider_name.to_sym == :managed
+            if machine.provider_name.to_sym == :managed
+              machines << machine
+            else
+              @logger.debug("Skipping #{machine.name.to_s} because it doesn't use the :managed provider")
+            end
           end
 
           if machines.empty?
@@ -56,7 +62,7 @@ module VagrantPlugins
           # the implementation of a push action.
 
           options[:parallel] = true
-          strategy = options[:strategy] || machines.first.config.orchestrate.strategy
+          strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
           @env.ui.info("Pushing to managed servers using #{strategy} strategy.")
           case strategy.to_sym
           when :serial
@@ -88,16 +94,15 @@ module VagrantPlugins
 
         def deploy(options, *groups)
           groups.each_with_index do |machines, index|
+            @logger.debug("Orchestrating push to group number #{index + 1} of #{groups.size}.")
+            @logger.debug(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(",")}")
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
-              # TODO: This could be moved to a composite "push" action, so that
-              # we could just batchify one action, rather than trying to do this dance.
-              # As written, all of the provisioning would finish before all of the
-              # servers rebooted at the same time.
               batchify(machines, :up, options)
               batchify(machines, :provision, options)
               batchify(machines, :reload, options) if options[:reboot]
               batchify(machines, :destroy, options)
+              @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
             ensure
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
