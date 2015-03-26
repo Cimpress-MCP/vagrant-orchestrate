@@ -75,12 +75,12 @@ module VagrantPlugins
             result = deploy(options, machines.take(1), machines.drop(1))
           when :blue_green
             # Split into two (almost) equal groups
-            groups = machines.in_groups(2)
+            groups = split(machines)
             result = deploy(options, groups.first, groups.last)
           when :canary_blue_green
             # A single canary and then two equal groups
             canary = machines.take(1)
-            groups = machines.drop(1).in_groups(2)
+            groups = split(machines.drop(1))
             result = deploy(options, canary, groups.first, groups.last)
           else
             @env.ui.error("Invalid deployment strategy specified")
@@ -92,10 +92,20 @@ module VagrantPlugins
         end
         # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
+        def split(machines)
+          groups = machines.in_groups(2)
+          # Move an item from the first to second group if they are unbalanced so that
+          # the smaller group is pushed to first.
+          groups.last.unshift(groups.first.pop) if groups.first.size > groups.last.size
+          groups
+        end
+
         def deploy(options, *groups)
           groups.each_with_index do |machines, index|
-            @logger.debug("Orchestrating push to group number #{index + 1} of #{groups.size}.")
-            @logger.debug(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(',')}")
+            if groups.size > 1
+              @env.ui.info("Orchestrating push to group number #{index + 1} of #{groups.size}.")
+              @env.ui.info(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(',')}")
+            end
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
               batchify(machines, :up, options)
@@ -110,6 +120,8 @@ module VagrantPlugins
             # Don't prompt on the last group, that would be annoying
             unless index == groups.size - 1 || options[:force]
               return false unless prompt_for_continue
+            else
+              @logger.debug("Suppressing prompt because --force specified.") if options[:force]
             end
           end
         end
@@ -117,7 +129,7 @@ module VagrantPlugins
         def prompt_for_continue
           result = @env.ui.ask("Deployment paused for manual review. Would you like to continue? (y/n)")
           if result.upcase != "Y"
-            @env.ui.info("Deployment push action by user")
+            @env.ui.info("Deployment push action cancelled by user")
             return false
           end
           true
