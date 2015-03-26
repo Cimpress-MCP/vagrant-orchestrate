@@ -1,0 +1,10 @@
+language: ruby
+rvm:
+- 2.0.0
+deploy:
+  provider: rubygems
+  gem: vagrant-orchestrate
+  api_key:
+    secure: X5VNoys5YafYfpx2nuC8kjKqOSwFAKCFWizEsuaD77WtXXpgwYbhvuGxdkBqaRrV2fw+24V+ZnwibiuCbPdfd6rwgLEsOWnQk3uf5JG+a2cegoklM5fX5jneZxE5uNEa8Il45GCTApWpknvejIKYyzzG8uknnautTAEIK/gh7Rw=
+  on:
+    tags: true
