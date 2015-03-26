@@ -268,7 +268,7 @@ The push command is currently limited by convention to vagrant machines that use
 #### Deployment Strategy
 
 Vagrant Orchestrate supports several deployment [strategies](docs/strategy.md) including parallel, canary, and
-blue-green.
+half and half.
 
 You can push changes to all of your servers in parallel with
 

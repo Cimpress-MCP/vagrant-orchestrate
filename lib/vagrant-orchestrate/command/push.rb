@@ -63,7 +63,7 @@ module VagrantPlugins
 
           # Handle a couple of them more tricky edges.
           strategy = :serial if machines.size == 1
-          strategy = :blue_green if strategy.to_sym == :canary_blue_green && machines.size == 2
+          strategy = :half_half if strategy.to_sym == :canary_half_half && machines.size == 2
 
           case strategy.to_sym
           when :serial
@@ -74,11 +74,11 @@ module VagrantPlugins
           when :canary
             # A single canary server and then the rest
             result = deploy(options, machines.take(1), machines.drop(1))
-          when :blue_green
+          when :half_half
             # Split into two (almost) equal groups
             groups = split(machines)
             result = deploy(options, groups.first, groups.last)
-          when :canary_blue_green
+          when :canary_half_half
             # A single canary and then two equal groups
             canary = machines.take(1)
             groups = split(machines.drop(1))

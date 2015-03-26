@@ -1,7 +1,7 @@
 # Deployment Strategies
 
 Vagrant Orchestrate supports several deployment strategies including parallel and
-blue-green. Here we'll cover how to use the various strategies as well as describing
+half and half. Here we'll cover how to use the various strategies as well as describing
 situations when each might be useful.
 
 ## Strategies
@@ -36,9 +36,8 @@ provision [trigger](https://github.com/emyl/vagrant-triggers) to run a smoke tes
 
     config.orchestrate.strategy = :canary
 
-### Blue Green
-The [Blue Green](http://martinfowler.com/bliki/BlueGreenDeployment.html) deployment
-strategy deploys to half of the cluster in parallel, then the other half, with
+### Half and Half
+Deploys to half of the cluster in parallel, then the other half, with
 a pause in between. This won't manage any of your load balancing or networking
 configuration for you, but if your application has a healthcheck that your load
 balancer respects, it should be easy to turn it off at the start of your provisioning
@@ -47,19 +46,19 @@ then this will be the best blend of getting the deployment done quickly and main
 a running application. If the total number of target servers is odd then the smaller
 number will be deployed to first.
 
-    $ vagrant orchestrate push --strategy blue_green
+    $ vagrant orchestrate push --strategy half_half
 
-    config.orchestrate.strategy = :blue_green
+    config.orchestrate.strategy = :half_half
 
-### Canary Blue Green
+### Canary Half and Half
 Combines the two immediately above - deploying to a single
 server, pausing, then to half of the remaining cluster in parallel, pausing, and then the other half,
 also in parallel. This is good if you have a large number of servers and want to do a
 smoke test of a single server before committing to pushing to half of your farm.
 
-    $ vagrant orchestrate push --strategy canary_blue_green
+    $ vagrant orchestrate push --strategy canary_half_half
 
-		config.orchestrate.strategy = :canary_blue_green
+		config.orchestrate.strategy = :canary_half_half
 
 ## Specifying a strategy
 
