@@ -18,7 +18,7 @@ Alternatively, you can specify the deployment strategy in your Vagrantfile
 
     config.orchestrate.strategy = :parallel
 
-Command line parameters take precedence over Vagrantfile set configuration values.
+Command line parameters take precedence over configuration values set in the Vagrantfile.
 
 ## Strategies
 
@@ -57,11 +57,12 @@ provision [trigger](https://github.com/emyl/vagrant-triggers) to run a smoke tes
 The [Blue Green](http://martinfowler.com/bliki/BlueGreenDeployment.html) deployment
 strategy deploys to half of the cluster in parallel, then the other half, with
 a pause in between. This doesn't manage any of your load balancing or networking
-configuraiton for you, but if your application has a healthcheck that your load
+configuration for you, but if your application has a healthcheck that your load
 balancer respects, it should be easy to turn it off at the start of your provisioning
 and back on at the end. If your application can serve the load on half of its nodes
 then this will be the best blend of getting the deployment done quickly and maintaining
-a working application.
+a running application. If the total number of target servers is odd then the smaller
+number will be deployed to first.
 
     $ vagrant orchestrate push --strategy blue_green
 
@@ -70,7 +71,7 @@ a working application.
 ### Canary Blue Green
 This strategy simply combines the two immediately above - deploying to a single
 server, pausing, then to half the cluster in parallel, pausing, and then the remainder,
-also in parallel. Good if you have a large number of servers and want to do a
+also in parallel. This is good if you have a large number of servers and want to do a
 smoke test of a single server before committing to pushing to half of your farm.
 
     $ vagrant orchestrate push --strategy canary_blue_green
@@ -81,11 +82,15 @@ smoke test of a single server before committing to pushing to half of your farm.
 In order to automate the deployment process, it can be very useful to suppress
 prompts. You can achieve that in two ways:
 
-From the command line, add the `--force` or `-f` parameter
+From the command line, add the `--force` or `-f` parameters
 
     $ vagrant orchestrate push --strategy canary -f
 
 
-Within your vagrantfile, set the `force_push` setting to true
+Within your Vagrantfile, set the `force_push` setting to true
 
     config.orchestrate.force_push = true
+
+## Support for other strategies
+If you have ideas for other strategies that you think would be broadly useful,
+open an issue and we'll discuss.
