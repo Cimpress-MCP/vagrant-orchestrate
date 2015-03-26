@@ -3,6 +3,8 @@
 
 # Vagrant Orchestrate
 
+[![](http://i.imgur.com/71yAw5v.gif)
+
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
 to already provisioned (non-elastic) servers on top of the excellent vagrant-managed-servers plugin.
 It features a powerful templating `init` command and is designed from the
