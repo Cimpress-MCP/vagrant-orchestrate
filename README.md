@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/Cimpress-MCP/vagrant-orchestrate.svg?branch=master)](https://travis-ci.org/Cimpress-MCP/vagrant-orchestrate)
+[![Gem Version](https://badge.fury.io/rb/vagrant-orchestrate.svg)](http://badge.fury.io/rb/vagrant-orchestrate)
+
 # Vagrant Orchestrate
 
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
