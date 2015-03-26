@@ -110,10 +110,10 @@ module VagrantPlugins
             end
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
-#              batchify(machines, :up, options)
-#              batchify(machines, :provision, options)
-#              batchify(machines, :reload, options) if options[:reboot]
-#              batchify(machines, :destroy, options)
+              batchify(machines, :up, options)
+              batchify(machines, :provision, options)
+              batchify(machines, :reload, options) if options[:reboot]
+              batchify(machines, :destroy, options)
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
             ensure
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
