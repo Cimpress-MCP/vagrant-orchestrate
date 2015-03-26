@@ -4,7 +4,7 @@ rvm:
 deploy:
   provider: rubygems
   gem: vagrant-orchestrate
-  api_key:
-    secure: X5VNoys5YafYfpx2nuC8kjKqOSwFAKCFWizEsuaD77WtXXpgwYbhvuGxdkBqaRrV2fw+24V+ZnwibiuCbPdfd6rwgLEsOWnQk3uf5JG+a2cegoklM5fX5jneZxE5uNEa8Il45GCTApWpknvejIKYyzzG8uknnautTAEIK/gh7Rw=
   on:
     tags: true
+  api_key:
+    secure: qKr5F4kkezl1Vp+wfPX/8IO/7O6lqVqut6/Op1baALCWTtrSLyJpBND1fWaKVf01NZiJTmNXhCTHAEzZjbGkiqBpSqMdR2g8ISxEgj8hScw46RLmYBzH6RdL503O1j7HHyJNf2cUPQjjzLNriPowYhp92aut4z0bMCxZer7bd8o=
