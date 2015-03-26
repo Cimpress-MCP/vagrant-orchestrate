@@ -1,6 +1,7 @@
 require "optparse"
 require "vagrant"
 
+# Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
   def in_groups(num_groups)
     return [] if num_groups == 0
@@ -39,7 +40,6 @@ module VagrantPlugins
             end
           end
 
-          # Parse the options
           argv = parse_options(opts)
           return unless argv
 
@@ -54,16 +54,17 @@ module VagrantPlugins
 
           if machines.empty?
             @env.ui.info("No servers with :managed provider found. Skipping.")
-            return
+            return 0
           end
-
-          # This environment variable is used as a signal to the filtermanaged
-          # action so that we don't filter managed commands that are really just
-          # the implementation of a push action.
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
           @env.ui.info("Pushing to managed servers using #{strategy} strategy.")
+
+          # Handle a couple of them more tricky edges.
+          strategy = :serial if machines.size == 1
+          strategy = :blue_green if strategy.to_sym == :canary_blue_green && machines.size == 2
+
           case strategy.to_sym
           when :serial
             options[:parallel] = false
@@ -90,41 +91,43 @@ module VagrantPlugins
           return 1 unless result
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def split(machines)
           groups = machines.in_groups(2)
           # Move an item from the first to second group if they are unbalanced so that
           # the smaller group is pushed to first.
-          groups.last.unshift(groups.first.pop) if groups.first.size > groups.last.size
+          groups.last.unshift(groups.first.pop) if groups.any? && groups.first.size > groups.last.size
           groups
         end
 
         def deploy(options, *groups)
+          groups.select! { |g| g.size > 0 }
           groups.each_with_index do |machines, index|
+            next if machines.empty?
             if groups.size > 1
               @env.ui.info("Orchestrating push to group number #{index + 1} of #{groups.size}.")
               @env.ui.info(" -- Hosts: #{machines.collect { |m| m.name.to_s }.join(',')}")
             end
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
-              batchify(machines, :up, options)
-              batchify(machines, :provision, options)
-              batchify(machines, :reload, options) if options[:reboot]
-              batchify(machines, :destroy, options)
+#              batchify(machines, :up, options)
+#              batchify(machines, :provision, options)
+#              batchify(machines, :reload, options) if options[:reboot]
+#              batchify(machines, :destroy, options)
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
             ensure
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
 
             # Don't prompt on the last group, that would be annoying
-            unless index == groups.size - 1 || options[:force]
-              return false unless prompt_for_continue
-            else
+            if index == groups.size - 1 || options[:force]
               @logger.debug("Suppressing prompt because --force specified.") if options[:force]
+            else
+              return false unless prompt_for_continue
             end
           end
         end
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def prompt_for_continue
           result = @env.ui.ask("Deployment paused for manual review. Would you like to continue? (y/n)")
