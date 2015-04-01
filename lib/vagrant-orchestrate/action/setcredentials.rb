@@ -58,6 +58,7 @@ Continuing with default credentials."
         def prompt_username
           default = ENV["USERNAME"]
           default ||= ENV["USER"]
+          default = ENV["USERDOMAIN"] + "\\" + default if ENV["USERDOMAIN"]
           username = @ui.ask("username? [#{default}] ")
           username = default if username.empty?
           username
