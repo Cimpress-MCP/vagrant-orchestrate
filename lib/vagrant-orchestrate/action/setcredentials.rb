@@ -58,13 +58,14 @@ Continuing with default credentials."
         def prompt_username
           default = ENV["USERNAME"]
           default ||= ENV["USER"]
-          username = @ui.ask("username? [#{default}]")
+          default = ENV["USERDOMAIN"] + "\\" + default if ENV["USERDOMAIN"]
+          username = @ui.ask("username? [#{default}] ")
           username = default if username.empty?
           username
         end
 
         def prompt_password
-          @ui.ask("password?", echo: false)
+          @ui.ask("password? ", echo: false)
         end
 
         def check_creds_file(config_creds)
