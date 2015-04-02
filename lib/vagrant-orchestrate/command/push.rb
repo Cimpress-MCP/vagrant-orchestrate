@@ -113,9 +113,9 @@ module VagrantPlugins
               batchify(machines, :up, options)
               batchify(machines, :provision, options)
               batchify(machines, :reload, options) if options[:reboot]
+            ensure
               batchify(machines, :destroy, options)
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
-            ensure
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
 
