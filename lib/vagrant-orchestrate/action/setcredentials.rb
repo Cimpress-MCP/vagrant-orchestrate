@@ -47,8 +47,7 @@ Continuing with default credentials."
         end
 
         def apply_creds(username, password)
-          configs = [@machine.config.winrm, @machine.config.ssh]
-          configs.each do |config|
+          [@machine.config.winrm, @machine.config.ssh].each do |config|
             next unless config
             config.username = username
             config.password = password
