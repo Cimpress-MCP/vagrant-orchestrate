@@ -34,24 +34,24 @@ module VagrantPlugins
         Command::Root
       end
 
+      action_hook(:orchestrate, Plugin::ALL_ACTIONS) do |hook|
+        hook.before Vagrant::Action::Builtin::ConfigValidate, Action::SetCredentials
+      end
+
       action_hook(:orchestrate, :machine_action_up) do |hook|
         hook.prepend Action::FilterManaged
-        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_provision) do |hook|
         hook.prepend Action::FilterManaged
-        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_destroy) do |hook|
         hook.prepend Action::FilterManaged
-        hook.prepend Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_reload) do |hook|
         hook.prepend Action::FilterManaged
-        hook.prepend Action::SetCredentials
       end
 
       # This initializes the internationalization strings.
