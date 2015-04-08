@@ -4,7 +4,7 @@ Vagrant.configure(2) do |config|
   config.orchestrate.credentials.prompt = true
 
   managed_servers.each_with_index do |server, index|
-    config.vm.define "managed-#{index+1}" do |managed|
+    config.vm.define "managed-#{index + 1}" do |managed|
       managed.vm.provision "shell", inline: "echo 'hello world'"
       managed.vm.box = "managed-server-dummy"
       managed.vm.box_url = "./dummy.box"

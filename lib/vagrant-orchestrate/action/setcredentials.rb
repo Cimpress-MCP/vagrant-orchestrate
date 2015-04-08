@@ -12,13 +12,18 @@ module VagrantPlugins
           # Use credentials file to any username or password that is still undiscovered
           check_creds_file(config_creds, ui) unless config_creds.username && config_creds.password
 
+          config_creds = maybe_prompt(config_creds)
+
+          [config_creds.username, config_creds.password]
+        end
+
+        def maybe_prompt(config_creds)
           # Only prompt if allowed by config
           if config_creds.prompt
             config_creds.username ||= prompt_username(ui)
             config_creds.password ||= prompt_password(ui)
           end
-
-          [config_creds.username, config_creds.password]
+          config_creds
         end
 
         def apply_creds(machine, username, password)

@@ -7,7 +7,7 @@ Vagrant.configure(2) do |config|
   # These machines get spun up in the rake task and then the vagrant-spec tests
   # connect to them by IP address.
   managed_servers.each_with_index do |ip, index|
-    config.vm.define "local-#{index+1}" do |ubuntu|
+    config.vm.define "local-#{index + 1}" do |ubuntu|
       # minimize clock skew, since we're using the `date` command to measure
       # clock skew.
       ubuntu.vm.provision :shell, inline: "ntpdate pool.ntp.org"
@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
 
   # These managed boxes connect to the local boxes defined above by ip address.
   managed_servers.each_with_index do |server, index|
-    config.vm.define "managed-#{index+1}" do |managed|
+    config.vm.define "managed-#{index + 1}" do |managed|
       managed.vm.box = "managed-server-dummy"
       managed.vm.box_url = "./dummy.box"
       managed.ssh.password = "vagrant"

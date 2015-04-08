@@ -15,5 +15,5 @@ task :acceptance do
   system("vagrant provision /local/")
   system("bundle exec vagrant-spec test --components=orchestrate/push orchestrate/prompt")
   puts "Destroying target servers"
-  #system("vagrant destroy -f /local/")
+  system("vagrant destroy -f /local/")
 end
