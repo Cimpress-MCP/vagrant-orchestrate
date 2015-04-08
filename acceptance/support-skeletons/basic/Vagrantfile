@@ -15,9 +15,3 @@ Vagrant.configure(2) do |config|
     end
   end
 end
-
-# Canary Half-Half
-# managed-1 Tue Apr  7 20:38:24 UTC 2015
-# managed-2 Tue Apr  7 20:38:30 UTC 2015
-# managed-3 Tue Apr  7 20:38:35 UTC 2015
-# managed-4 Tue Apr  7 20:38:35 UTC 2015

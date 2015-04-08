@@ -58,6 +58,7 @@ describe "vagrant orchestrate push", component: "orchestrate/push" do
     datetimes = []
     machines.each do |machine|
       execute("vagrant", "up", machine)
+      # This file is written by the shell provisioner in ../support-skeletons/basic/Vagrantfile
       result = execute("vagrant", "ssh", "-c", "cat /tmp/sync_time", machine)
       datetimes << DateTime.parse(result.stdout.chomp)
     end

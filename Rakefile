@@ -13,7 +13,7 @@ task :acceptance do
   puts "Brining up target servers"
   system("vagrant up /local/ --no-provision")
   system("vagrant provision /local/")
-  system("bundle exec vagrant-spec test   --components=orchestrate/push orchestrate/prompt orchestrate/file_creds")
+  system("bundle exec vagrant-spec test --components=orchestrate/push orchestrate/prompt")
   puts "Destroying target servers"
   #system("vagrant destroy -f /local/")
 end

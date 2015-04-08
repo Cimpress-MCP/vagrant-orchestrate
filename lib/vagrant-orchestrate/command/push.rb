@@ -1,6 +1,5 @@
 require "optparse"
 require "vagrant"
-require "vagrant/action/builder"
 require "vagrant-orchestrate/action/setcredentials"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
