@@ -12,6 +12,7 @@ desc "Run acceptance tests with vagrant-spec"
 task :acceptance do
   puts "Brining up target servers"
   system("vagrant up /local/ --no-provision")
+  # To ensure the ntp sync happens even if the servers are already up
   system("vagrant provision /local/")
   system("bundle exec vagrant-spec test --components=orchestrate/push orchestrate/prompt")
   puts "Destroying target servers"
