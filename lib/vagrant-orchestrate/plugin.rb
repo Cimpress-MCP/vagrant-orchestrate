@@ -35,7 +35,7 @@ module VagrantPlugins
       end
 
       action_hook(:orchestrate, Plugin::ALL_ACTIONS) do |hook|
-        hook.before Vagrant::Action::Builtin::ConfigValidate, Action::SetCredentials
+#        hook.before Vagrant::Action::Builtin::ConfigValidate, Action::SetCredentials
       end
 
       action_hook(:orchestrate, :machine_action_up) do |hook|

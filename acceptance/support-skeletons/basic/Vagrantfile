@@ -1,0 +1,23 @@
+managed_servers = %w( 192.168.10.80 192.168.10.81 192.168.10.82 192.168.10.83)
+
+Vagrant.configure(2) do |config|
+  config.ssh.password = "vagrant"
+  managed_servers.each_with_index do |server, index|
+    config.vm.define "managed-#{index+1}" do |managed|
+      managed.vm.provision "shell", inline: "date > /tmp/sync_time; sleep 3"
+      managed.vm.box = "managed-server-dummy"
+      managed.vm.box_url = "./dummy.box"
+      # TODO: Why in the world do I need this? I thought it was the default!
+      managed.ssh.password = "vagrant"
+      managed.vm.provider :managed do |provider|
+        provider.server = server
+      end
+    end
+  end
+end
+
+# Canary Half-Half
+# managed-1 Tue Apr  7 20:38:24 UTC 2015
+# managed-2 Tue Apr  7 20:38:30 UTC 2015
+# managed-3 Tue Apr  7 20:38:35 UTC 2015
+# managed-4 Tue Apr  7 20:38:35 UTC 2015

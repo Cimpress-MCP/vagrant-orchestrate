@@ -1,6 +1,5 @@
 require "vagrant-orchestrate/command/init"
 require "vagrant-spec/unit"
-require "pp"
 
 describe VagrantPlugins::Orchestrate::Command::Init do
   include_context "vagrant-unit"
