@@ -11,6 +11,8 @@ task default: :build
 desc "Run acceptance tests with vagrant-spec"
 task :acceptance do
   puts "Brining up target servers"
+  # Spinning up local servers here, which the managed provider will connect to
+  # by IP. See the Vagrantfile in the root of the repo for more info.
   system("vagrant up /local/ --no-provision")
   # To ensure the ntp sync happens even if the servers are already up
   system("vagrant provision /local/")
