@@ -1,5 +1,6 @@
 require "optparse"
 require "vagrant"
+require "vagrant-orchestrate/action/setcredentials"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
@@ -56,6 +57,8 @@ module VagrantPlugins
             @env.ui.info("No servers with :managed provider found. Skipping.")
             return 0
           end
+
+          retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -130,7 +133,7 @@ module VagrantPlugins
         # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def prompt_for_continue
-          result = @env.ui.ask("Deployment paused for manual review. Would you like to continue? (y/n)")
+          result = @env.ui.ask("Deployment paused for manual review. Would you like to continue? (y/n) ")
           if result.upcase != "Y"
             @env.ui.info("Deployment push action cancelled by user")
             return false
@@ -143,6 +146,23 @@ module VagrantPlugins
             machines.each do |machine|
               batch.action(machine, action, options)
             end
+          end
+        end
+
+        def retrieve_creds(machines)
+          creds = VagrantPlugins::Orchestrate::Action::SetCredentials.new
+          (username, password) = creds.retrieve_creds(@env.vagrantfile.config.orchestrate.credentials, @env.ui)
+
+          # Apply the credentials to the machine info, or back out if we were unable to procure them.
+          if username && password
+            machines.each do |machine|
+              creds.apply_creds(machine, username, password)
+            end
+          else
+            @env.ui.warn <<-WARNING
+Vagrant-orchestrate could not gather credentials. \
+Continuing with default credentials."
+            WARNING
           end
         end
       end
