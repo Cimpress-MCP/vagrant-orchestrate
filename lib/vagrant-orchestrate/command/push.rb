@@ -44,6 +44,8 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
+          guard_clean unless ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"]
+
           machines = []
           with_target_vms(argv) do |machine|
             if machine.provider_name.to_sym == :managed
@@ -164,6 +166,20 @@ Vagrant-orchestrate could not gather credentials. \
 Continuing with default credentials."
             WARNING
           end
+        end
+
+        def guard_clean
+          clean? && committed? || abort("ERROR!\nThere are files that need to be committed first.")
+        end
+
+        def clean?
+          `git diff --exit-code 2>&1`
+          $CHILD_STATUS == 0
+        end
+
+        def committed?
+          `git diff-index --quiet --cached HEAD 2>&1`
+          $CHILD_STATUS == 0
         end
       end
     end
