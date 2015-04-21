@@ -25,6 +25,11 @@ module VagrantPlugins
             require_relative "push"
             Push
           end
+
+          @subcommands.register(:status) do
+            require_relative "status"
+            Status
+          end
         end
 
         def execute
@@ -44,7 +49,6 @@ module VagrantPlugins
         end
 
         # Prints the help out for this command
-        # rubocop:disable Metrics/AbcSize
         def help
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate <subcommand> [<args>]"
@@ -66,7 +70,6 @@ module VagrantPlugins
 
           @env.ui.info(opts.help, prefix: false)
         end
-        # rubocop:enable Metrics/AbcSize
       end
     end
   end

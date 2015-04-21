@@ -1,7 +1,6 @@
 managed_servers = %w( 192.168.10.80 192.168.10.81 192.168.10.82 192.168.10.83)
 
 Vagrant.configure(2) do |config|
-
   config.orchestrate.filter_managed_commands = true
 
   # These boxes are defined locally to enable acceptance testing. Spinning up
