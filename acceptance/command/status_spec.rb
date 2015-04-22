@@ -25,7 +25,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
     # environment variables. See vagrant-orchestrate/repo_status.rb for impl.
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REF"] = TEST_REF
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REMOTE_ORIGIN_URL"] = TEST_REMOTE_ORIGIN_URL
-    result = execute("vagrant", "orchestrate", "push", "/managed-1/")
+    execute("vagrant", "orchestrate", "push", "/managed-1/")
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     status = VagrantPlugins::Orchestrate::RepoStatus.new
     # Punting on date. Can always add it later if needed
