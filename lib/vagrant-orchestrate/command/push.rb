@@ -111,7 +111,7 @@ module VagrantPlugins
             begin
               batchify(machines, :up, options)
               batchify(machines, :provision, options)
-              upload_status(File.join(@env.tmp_path, "vagrant_orchestrate_status"), @status.repo, machines)
+              upload_status(machines)
               batchify(machines, :reload, options) if options[:reboot]
             ensure
               batchify(machines, :destroy, options)
@@ -174,23 +174,34 @@ module VagrantPlugins
           $CHILD_STATUS == 0
         end
 
-        def upload_status(machines)
+        def upload_status_all(machines)
           status = RepoStatus.new
-          source = File.write(File.join(@env.tmp_path, "vagrant_orchestrate_status"), status.to_json)
+          source = File.join(@env.tmp_path, "vagrant_orchestrate_status")
+          File.write(source, status.to_json)
           machines.each do |machine|
-            destination = status.remote_path(machine.vm.communicator)
-            parent_folder = File.split(destination)[0]
-            machine.communicate.wait_for_ready(5)
-            @logger.debug("Ensuring vagrant_orchestrate status directory exists")
-            machine.communicate.sudo("mkdir -p #{parent_folder}")
-            machine.communicate.sudo("chmod 777 #{parent_folder}")
-            @logger.debug("Uploading vagrant_orchestrate status file")
-            @logger.debug("  source: #{source}")
-            @logger.debug("  dest: #{destination}")
-            machine.communicate.upload(source, destination)
-            @logger.debug("Setting uploaded file world-writable")
-            machine.communicate.sudo("chmod 777 #{destination}")
+            upload_status_one(source, status, machine)
           end
+        ensure
+          File.delete(source) if File.exist?(source)
+        end
+
+        def upload_status_one(source, status, machine)
+          destination = status.remote_path(machine.config.vm.communicator)
+          parent_folder = File.split(destination)[0]
+          machine.communicate.wait_for_ready(5)
+          @logger.debug("Ensuring vagrant_orchestrate status directory exists")
+          machine.communicate.sudo("mkdir -p #{parent_folder}")
+          machine.communicate.sudo("chmod 777 #{parent_folder}")
+          @logger.debug("Uploading vagrant_orchestrate status file")
+          @logger.debug("  source: #{source}")
+          @logger.debug("  dest: #{destination}")
+          machine.communicate.upload(source, destination)
+          @logger.debug("Setting uploaded file world-writable")
+          machine.communicate.sudo("chmod 777 #{destination}")
+        rescue => ex
+          @logger.error(ex)
+          @env.ui.warn("An error occurred when trying to upload status to #{machine.name}. Continuing")
+          @env.ui.warn(ex.message)
         end
       end
     end
