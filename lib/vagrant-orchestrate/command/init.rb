@@ -142,7 +142,7 @@ module VagrantPlugins
                                              environments: options[:environments],
                                              plugins: options[:plugins],
                                              creds_prompt: options[:creds_prompt]
-                                             )
+                                            )
           write_file("Vagrantfile", contents, options)
           FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
                        File.join(@env.cwd, "dummy.box"))

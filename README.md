@@ -14,7 +14,7 @@ Linux, and Mac**.
 ## Quick start
 
 ```
-$ vagrant orchestrate init --shell --shell-inline "echo Hello" \
+$ vagrant orchestrate init --shell --shell-inline "echo Hello!" \
   --servers myserver1.mydomain.com,myserver2.mydomain.com \
   --ssh-username USERNAME --ssh-private-key-path PATH
 $ vagrant orchestrate push
@@ -109,94 +109,24 @@ This works for Windows managed servers using WinRM as well
 
 #### Plugins
 
-This also supports a self-contained way to install plugins, just list them in the required_plugins section
+This also supports a portable way to install plugins, just list them in the required_plugins section
 
 ```ruby
 required_plugins = %w( vagrant-managed-servers vagrant-hostsupdater )
 ```
 
 #### Working with multiple environments
-It is a very common pattern in software development to have separate environments - e.g. dev, test, and prod.
-Vagrant Orchestrate offers a way to manage multiple environments using a combination of a single servers.json
-file and the name of the current git branch to know which the current environment is.
 
-```javascript
-# servers.json
-{
-  "environments": {
-    "dev": {
-      "servers": [
-        "dev.myapp.mydomain.com"
-      ]
-    },
-    "test": {
-      "servers": [
-        "test1.myapp.mydomain.com",
-        "test2.myapp.mydomain.com"
-      ]
-    },
-    "prod": {
-      "servers": [
-        "prod1.myapp.mydomain.com",
-        "prod2.myapp.mydomain.com",
-        "prod3.myapp.mydomain.com"
-      ]
-    }
-  }
-}
-```
+Vagrant Orchestrate offers a way to manage multiple environments using a combination of a single servers.json file and the name of the current git branch as an indicator of the current environment.
 
-Add the following line to the top of your `Vagrantfile`
+To initialize an environment aware Vagrantfile, use
 
-```ruby
-managed_servers = VagrantPlugins::Orchestrate::Plugin.load_servers_for_branch
-```
+    $ vagrant orchestrate init --environments dev,test,prod
 
-If you create git branches named `dev`, `test`, and `prod`, your vagrantfile will become environment aware and
-you'll only be able to see the servers appropriate for that environment.
+You'll need to create git branches with matching names and fill out the servers.json
+file in order for the Vagrantfile to be git branch aware.
 
-```
-$ git branch
-* dev
-  test
-  prod
-$ vagrant status
-Current machine states:
-
-local                     not created (virtualbox)
-dev.myapp.mydomain.com    not created (managed)
-
-$ git checkout test
-Switched to branch 'test'
-$ vagrant status
-Current machine states:
-
-local                     not created (virtualbox)
-test1.myapp.mydomain.com  not created (managed)
-test2.myapp.mydomain.com  not created (managed)
-
-$ git checkout prod
-Switched to branch 'prod'
-$ vagrant status
-Current machine states:
-
-local                     not created (virtualbox)
-prod1.myapp.mydomain.com  not created (managed)
-prod2.myapp.mydomain.com  not created (managed)
-prod3.myapp.mydomain.com  not created (managed)
-```
-
-Any branch that doesn't have a matching environment in the servers.json file will
-not list any managed servers.
-
-```
-$ git checkout -b my_feature_branch
-Switched to a new branch 'my_feature_branch'
-$ vagrant status
-Current machine states:
-
-local                     not created (virtualbox)
-```
+Learn more about [environments](docs/environments.md)
 
 #### Credentials
 
@@ -206,13 +136,7 @@ by passing the `--credentials-prompt` flag to the `vagrant orchestrate init` com
 or add the following to your Vagrantfile.
 
 ```ruby
-Vagrant.configure("2") do |config|
-
-  ...
-
-  config.orchestrate.credentials do |creds|
-    creds.prompt = true
-  end
+  config.orchestrate.credentials.prompt = true
 ```
 
 The credentials config object can accept one additional parameter, `file_path`. Setting
@@ -227,36 +151,7 @@ will be checked.
 
 #### Puppet
 
-Experimental puppet templating support is available as well with the `--puppet` flag and associated options
-
-```ruby
-  required_plugins = %w( vagrant-managed-servers vagrant-librarian-puppet )
-
-  ...
-
-  config.librarian_puppet.placeholder_filename = ".gitignore"
-  config.vm.provision "puppet" do |puppet|
-    puppet.module_path = 'modules'
-    puppet.hiera_config_path = 'hiera.yaml'
-  end
-```
-
-The following files and folders will be placed in the puppet directory
-
-```
-Puppetfile
-Vagrantfile
-dummy.box
-hiera/
-  common.yaml
-hiera.yaml
-manifests/
-  default.pp
-modules/
-  .gitignore
-```
-
-For a full list of init options, run `vagrant orchestrate init --help`
+Experimental [puppet templating](docs/puppet.md) support is available as well with the `--puppet` flag and associated options
 
 ### Pushing changes
 Go ahead and push changes to your managed servers, in serial by default.
@@ -267,12 +162,26 @@ The push command is currently limited by convention to vagrant machines that use
 
 #### Deployment Strategy
 
-Vagrant Orchestrate supports several deployment [strategies](docs/strategy.md) including parallel, canary, and
-half and half.
+Vagrant Orchestrate supports several deployment [strategies](docs/strategy.md) including parallel, canary, and half and half.
 
 You can push changes to all of your servers in parallel with
 
     $ vagrant orchestrate push --strategy parallel
+
+### Status
+The `vagrant orchestrate status` command will reach out to each of the defined
+managed servers and print information about the last successful push from this
+repo, including date, ref, and user that performed the push.
+
+```
+$ vagrant orchestrate status
+Current managed server states:
+
+managed-1  2015-04-19 00:46:22 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
+managed-2  2015-04-19 00:46:22 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
+managed-3  Status unavailable.
+managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
+```
 
 ## Filtering managed commands
 It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider.
@@ -280,14 +189,6 @@ It can be easy to make mistakes such as rebooting production if you have managed
 ```ruby
   config.orchestrate.filter_managed_commands = true
 ```
-
-## Branching strategy
-
-If you have several environments (e.g. dev, test, prod), it is recommended to create
-a separate branch for each environment and put the appropriate servers into the
-managed_servers array at the top of the Vagrantfile for each. To move a change
-across branches, simply create a feature branch from your earliest branch and then
-merge that feature into downstream environments to avoid conflicts.
 
 ## Tips for Windows hosts
 
@@ -302,14 +203,13 @@ merge that feature into downstream environments to avoid conflicts.
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-## Development Tips
+## Development Flow
 
-You'll want Ruby v2.0.0* and bundler for developing changes.
+Prerequisites:
+* Ruby 2.0 or greater
 
-During the course of development you'll want to run the code you're working on,
-not the version of Vagrant Orchestrate you've installed. In order to accomplish
-this, run your vagrant orchestrate commands in the bundler environment.
-
-In your shell:
-
-    $ bundle exec vagrant orchestrate
+Flow:
+1. Develop your feature
+2. Test locally with `bundle exec vagrant orchestrate *`
+3. `bundle exec rake build`
+4. `bundle exec rake acceptance`, which will take a few minutes

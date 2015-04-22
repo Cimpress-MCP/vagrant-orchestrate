@@ -1,6 +1,8 @@
 require "optparse"
 require "vagrant"
 require "vagrant-orchestrate/action/setcredentials"
+require "vagrant-orchestrate/repo_status"
+require_relative "command_mixins"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
@@ -16,6 +18,7 @@ module VagrantPlugins
     module Command
       class Push < Vagrant.plugin("2", :command)
         include Vagrant::Util
+        include CommandMixins
 
         @logger = Log4r::Logger.new("vagrant_orchestrate::command::push")
 
@@ -44,19 +47,10 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          machines = []
-          with_target_vms(argv) do |machine|
-            if machine.provider_name.to_sym == :managed
-              machines << machine
-            else
-              @logger.debug("Skipping #{machine.name} because it doesn't use the :managed provider")
-            end
-          end
+          guard_clean unless ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"]
 
-          if machines.empty?
-            @env.ui.info("No servers with :managed provider found. Skipping.")
-            return 0
-          end
+          machines = filter_unmanaged(argv)
+          return 0 if machines.empty?
 
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
@@ -94,6 +88,7 @@ module VagrantPlugins
           return 1 unless result
           0
         end
+        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def split(machines)
           groups = machines.in_groups(2)
@@ -103,6 +98,7 @@ module VagrantPlugins
           groups
         end
 
+        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def deploy(options, *groups)
           groups.select! { |g| g.size > 0 }
           groups.each_with_index do |machines, index|
@@ -115,6 +111,7 @@ module VagrantPlugins
             begin
               batchify(machines, :up, options)
               batchify(machines, :provision, options)
+              upload_status_all(machines)
               batchify(machines, :reload, options) if options[:reboot]
             ensure
               batchify(machines, :destroy, options)
@@ -159,11 +156,52 @@ module VagrantPlugins
               creds.apply_creds(machine, username, password)
             end
           else
-            @env.ui.warn <<-WARNING
-Vagrant-orchestrate could not gather credentials. \
-Continuing with default credentials."
-            WARNING
+            @env.ui.warn "Vagrant-orchestrate could not gather credentials. Continuing with default credentials."
           end
+        end
+
+        def guard_clean
+          clean? && committed? || abort("ERROR!\nThere are files that need to be committed first.")
+        end
+
+        def clean?
+          `git diff --exit-code 2>&1`
+          $CHILD_STATUS == 0
+        end
+
+        def committed?
+          `git diff-index --quiet --cached HEAD 2>&1`
+          $CHILD_STATUS == 0
+        end
+
+        def upload_status_all(machines)
+          status = RepoStatus.new
+          source = File.join(@env.tmp_path, "vagrant_orchestrate_status")
+          File.write(source, status.to_json)
+          machines.each do |machine|
+            upload_status_one(source, status, machine)
+          end
+        ensure
+          File.delete(source) if File.exist?(source)
+        end
+
+        def upload_status_one(source, status, machine)
+          destination = status.remote_path(machine.config.vm.communicator)
+          parent_folder = File.split(destination)[0]
+          machine.communicate.wait_for_ready(5)
+          @logger.debug("Ensuring vagrant_orchestrate status directory exists")
+          machine.communicate.sudo("mkdir -p #{parent_folder}")
+          machine.communicate.sudo("chmod 777 #{parent_folder}")
+          @logger.debug("Uploading vagrant_orchestrate status file")
+          @logger.debug("  source: #{source}")
+          @logger.debug("  dest: #{destination}")
+          machine.communicate.upload(source, destination)
+          @logger.debug("Setting uploaded file world-writable")
+          machine.communicate.sudo("chmod 777 #{destination}")
+        rescue => ex
+          @logger.error(ex)
+          @env.ui.warn("An error occurred when trying to upload status to #{machine.name}. Continuing")
+          @env.ui.warn(ex.message)
         end
       end
     end
