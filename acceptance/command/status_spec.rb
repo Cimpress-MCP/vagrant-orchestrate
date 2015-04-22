@@ -26,7 +26,6 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REF"] = TEST_REF
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REMOTE_ORIGIN_URL"] = TEST_REMOTE_ORIGIN_URL
     result = execute("vagrant", "orchestrate", "push", "/managed-1/")
-    puts result.stdout
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     status = VagrantPlugins::Orchestrate::RepoStatus.new
     # Punting on date. Can always add it later if needed

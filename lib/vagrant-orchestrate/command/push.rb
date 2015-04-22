@@ -111,7 +111,7 @@ module VagrantPlugins
             begin
               batchify(machines, :up, options)
               batchify(machines, :provision, options)
-              upload_status(machines)
+              upload_status_all(machines)
               batchify(machines, :reload, options) if options[:reboot]
             ensure
               batchify(machines, :destroy, options)
