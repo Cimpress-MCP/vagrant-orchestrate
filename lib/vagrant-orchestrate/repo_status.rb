@@ -30,7 +30,7 @@ module VagrantPlugins
 
       def user
         user = ENV["USER"] || ENV["USERNAME"] || "unknown"
-        user = ENV["USERDOMAIN"] + "\\" + @user if ENV["USERDOMAIN"]
+        user = ENV["USERDOMAIN"] + "\\" + user if ENV["USERDOMAIN"]
 
         @user ||= user
         @user
