@@ -183,7 +183,7 @@ module VagrantPlugins
             upload_status_one(source, status, machine)
           end
         ensure
-          File.delete(source) if File.exist?(source)
+          super_delete(source) if File.exist?(source)
         end
 
         def upload_status_one(source, status, machine)

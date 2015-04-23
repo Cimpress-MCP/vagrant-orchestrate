@@ -20,6 +20,20 @@ module VagrantPlugins
 
           machines
         end
+
+        # Delete a file in a way that works on windows
+        def super_delete(filepath)
+          # Thanks, Windows. http://alx.github.io/2009/01/27/ruby-wundows-unlink.html
+          10.times do
+            begin
+              File.delete(filepath)
+              break
+            rescue
+              @logger.warn("Unable to delete file #{filepath}")
+              sleep 0.05
+            end
+          end
+        end
       end
     end
   end

@@ -61,7 +61,7 @@ module VagrantPlugins
           @env.ui.warn(ex.message)
           return machine.name.to_s + "   Status unavailable."
         ensure
-          File.delete(local) if File.exist?(local)
+          super_delete(local) if File.exist?(local)
         end
       end
     end
