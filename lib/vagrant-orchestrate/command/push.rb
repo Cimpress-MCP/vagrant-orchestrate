@@ -1,3 +1,4 @@
+require "English"
 require "optparse"
 require "vagrant"
 require "vagrant-orchestrate/action/setcredentials"
