@@ -162,7 +162,7 @@ module VagrantPlugins
         end
 
         def guard_clean
-          clean? && committed? || abort("ERROR!\nThere are files that need to be committed first.")
+          clean? && committed? && !untracked? || abort("ERROR!\nThere are files that need to be committed first.")
         end
 
         def clean?
@@ -173,6 +173,13 @@ module VagrantPlugins
         def committed?
           `git diff-index --quiet --cached HEAD 2>&1`
           $CHILD_STATUS == 0
+        end
+
+        # Return whether there are any untracked files in the git repo
+        def untracked?
+          output = `git ls-files --other --exclude-standard --directory --no-empty-directory 2>&1`
+          # This command lists untracked files. There are untracked files if the ouput is not empty.
+          !output.empty?
         end
 
         def upload_status_all(machines)
