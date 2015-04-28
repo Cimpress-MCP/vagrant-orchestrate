@@ -1,6 +1,9 @@
 language: ruby
+before_install:
+  - gem uninstall bundler --all --executables
+  - gem install bundler --version '< 1.7.0'
 rvm:
-- 2.0.0
+  - 2.0.0
 deploy:
   provider: rubygems
   gem: vagrant-orchestrate
