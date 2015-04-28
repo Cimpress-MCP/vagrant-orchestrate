@@ -6,17 +6,19 @@
 ![](http://i.imgur.com/71yAw5v.gif)
 
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
-to already provisioned (non-elastic) servers on top of the excellent vagrant-managed-servers plugin.
-It features a powerful templating `init` command and is designed from the
-ground up to be cross-platform, with first class support for **Windows,
+to already provisioned (non-elastic) servers on top of the excellent [vagrant-managed-servers](http://github.com/tknerr/vagrant-managed-servers) plugin.
+It features a powerful templating `init` command, support for multiple environments, several deployment strategies 
+and is designed from the ground up to be cross-platform, with first class support for **Windows,
 Linux, and Mac**.
 
 ## Quick start
 
 ```
-$ vagrant orchestrate init --shell --shell-inline "echo Hello!" \
+$ vagrant orchestrate init --shell --shell-inline "echo Hello" \
   --servers myserver1.mydomain.com,myserver2.mydomain.com \
   --ssh-username USERNAME --ssh-private-key-path PATH
+$ ls
+Vagrantfile	  dummy.box
 $ vagrant orchestrate push
 ==> managed-myserver1.mydomain.com: Linking vagrant with managed server myserver1.mydomain.com
 ==> managed-myserver1.mydomain.com:  -- Server: myserver1.mydomain.com
@@ -36,7 +38,7 @@ $ vagrant orchestrate push
 ==> managed-myserver2.mydomain.com:  -- Server: myserver2.mydomain.com
 ```
 
-This also works for Windows with the `--winrm --winrm-username --wirnm-password` parameters, but currently must be initiated from a Windows host.
+This also works for Windows with the `--winrm --winrm-username USERNAME --wirnm-password PASSWORD` parameters, but currently must be initiated from a Windows host.
 
 ## Usage
 
@@ -123,10 +125,10 @@ To initialize an environment aware Vagrantfile, use
 
     $ vagrant orchestrate init --environments dev,test,prod
 
-You'll need to create git branches with matching names and fill out the servers.json
+You'll need to create git branches with matching names and enter data into the the servers.json
 file in order for the Vagrantfile to be git branch aware.
 
-Learn more about [environments](docs/environments.md)
+Learn more about [environments](docs/environments.md).
 
 #### Credentials
 
@@ -158,7 +160,14 @@ Go ahead and push changes to your managed servers, in serial by default.
 
     $ vagrant orchestrate push
 
-The push command is currently limited by convention to vagrant machines that use the `:managed` provider. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those.
+The push command is currently limited to vagrant machines that use the `:managed` provider. So if you have other, local machines defined in the Vagrantfile, `vagrant orchestrate push` will not operate on those.
+
+### Filtering managed commands
+It can be easy to make mistakes such as rebooting a production server if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider. This can be disabled by setting the variable to false in the Vagrantfile.
+
+```ruby
+  config.orchestrate.filter_managed_commands = true
+```
 
 #### Deployment Strategy
 
@@ -183,13 +192,6 @@ managed-3  Status unavailable.
 managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
 ```
 
-## Filtering managed commands
-It can be easy to make mistakes such as rebooting production if you have managed long-lived servers as well as local VMs defined in your Vagrantfile. We add some protection with the `orchestrate.filter_managed_commands` configuration setting, which will cause up, provision, reload, and destroy commands to be ignored for servers with the managed provider.
-
-```ruby
-  config.orchestrate.filter_managed_commands = true
-```
-
 ## Tips for Windows hosts
 
 * Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script](https://github.com/joefitzgerald/packer-windows/blob/master/scripts/rsync.bat) to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
@@ -210,6 +212,6 @@ Prerequisites:
 
 Flow:
 1. Develop your feature
-2. Test locally with `bundle exec vagrant orchestrate *`
+2. Run locally with `bundle exec vagrant orchestrate [init|push|status]`
 3. `bundle exec rake build`
 4. `bundle exec rake acceptance`, which will take a few minutes
