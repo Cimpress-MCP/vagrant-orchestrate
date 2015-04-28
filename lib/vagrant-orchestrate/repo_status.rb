@@ -56,6 +56,23 @@ module VagrantPlugins
           File.join("/var", "state", "vagrant_orchestrate", repo)
         end
       end
+
+      def self.clean?
+        `git diff --exit-code 2>&1`
+        $CHILD_STATUS == 0
+      end
+
+      def self.committed?
+        `git diff-index --quiet --cached HEAD 2>&1`
+        $CHILD_STATUS == 0
+      end
+
+      # Return whether there are any untracked files in the git repo
+      def self.untracked?
+        output = `git ls-files --other --exclude-standard --directory --no-empty-directory 2>&1`
+        # This command lists untracked files. There are untracked files if the ouput is not empty.
+        !output.empty?
+      end
     end
   end
 end

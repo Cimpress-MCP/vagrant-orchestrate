@@ -162,17 +162,8 @@ module VagrantPlugins
         end
 
         def guard_clean
-          clean? && committed? || abort("ERROR!\nThere are files that need to be committed first.")
-        end
-
-        def clean?
-          `git diff --exit-code 2>&1`
-          $CHILD_STATUS == 0
-        end
-
-        def committed?
-          `git diff-index --quiet --cached HEAD 2>&1`
-          $CHILD_STATUS == 0
+          message = "ERROR!\nThere are files that need to be committed first."
+          RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
         end
 
         def upload_status_all(machines)

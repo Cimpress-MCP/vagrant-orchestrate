@@ -13,7 +13,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
 
   it "handles no status file gracefully" do
     # Make sure we're starting from a clean slate, rspec order isn't guaranteed.
-    execute("vagrant", "ssh", "-c", "\"rm -rf /var/state/vagrant_orchestrate\" /managed-1/")
+    execute("vagrant", "ssh", "-c", "\"rm -rf /var/state/vagrant_orchestrate\" managed-1")
     # All commands are executed against a single machine to reduce variability
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     expect(result.stdout).to include("Status unavailable.")
@@ -25,6 +25,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
     # environment variables. See vagrant-orchestrate/repo_status.rb for impl.
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REF"] = TEST_REF
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REMOTE_ORIGIN_URL"] = TEST_REMOTE_ORIGIN_URL
+    ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] = "true"
     execute("vagrant", "orchestrate", "push", "/managed-1/")
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     status = VagrantPlugins::Orchestrate::RepoStatus.new
