@@ -13,7 +13,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
 
   it "handles no status file gracefully" do
     # Make sure we're starting from a clean slate, rspec order isn't guaranteed.
-    execute("vagrant", "ssh", "-c", "\"rm -rf /var/state/vagrant_orchestrate\" /managed-1/")
+    execute("vagrant", "ssh", "-c", "\"rm -rf /var/state/vagrant_orchestrate\" managed-1")
     # All commands are executed against a single machine to reduce variability
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     expect(result.stdout).to include("Status unavailable.")
