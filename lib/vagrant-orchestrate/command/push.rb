@@ -27,10 +27,15 @@ module VagrantPlugins
         def execute
           options = {}
           options[:force] = @env.vagrantfile.config.orchestrate.force_push
+          options[:provision] = true
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate push"
             o.separator ""
+
+            o.on("--[no-]provision", "Enable or disable provisioning. Default is true") do |p|
+              options[:provision] = p
+            end
 
             o.on("--reboot", "Reboot a managed server after the provisioning step") do
               options[:reboot] = true
@@ -111,7 +116,7 @@ module VagrantPlugins
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
               batchify(machines, :up, options)
-              batchify(machines, :provision, options)
+              batchify(machines, :provision, options) if options[:provision]
               upload_status_all(machines)
               batchify(machines, :reload, options) if options[:reboot]
             ensure

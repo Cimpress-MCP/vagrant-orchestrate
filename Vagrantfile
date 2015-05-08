@@ -2,6 +2,7 @@ managed_servers = %w( 192.168.10.80 192.168.10.81 192.168.10.82 192.168.10.83)
 
 Vagrant.configure(2) do |config|
   config.orchestrate.filter_managed_commands = true
+  config.vm.provision :shell, inline: "echo hello"
 
   # These boxes are defined locally to enable acceptance testing. Spinning up
   # real boxes in the vagrant-spec environment was expensive because it ignored
