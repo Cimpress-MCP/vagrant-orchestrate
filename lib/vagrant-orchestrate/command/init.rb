@@ -23,7 +23,7 @@ module VagrantPlugins
           options[:servers] = []
           options[:environments] = []
           options[:plugins] = DEFAULT_PLUGINS
-          options[:puppet_librarian_puppet] = true
+          options[:puppet_librarian_puppet] = false
           options[:puppet_hiera] = true
 
           opts = OptionParser.new do |o|

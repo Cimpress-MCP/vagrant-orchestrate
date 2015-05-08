@@ -17,7 +17,8 @@ task :acceptance do
   # To ensure the ntp sync happens even if the servers are already up
   system("vagrant provision /local/")
   ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] = "true"
-  system("bundle exec vagrant-spec test --components=orchestrate/push orchestrate/prompt orchestrate/status")
+  system("bundle exec vagrant-spec test \
+    --components=orchestrate/push orchestrate/prompt orchestrate/status orchestrate/provision")
   puts "Destroying target servers"
   system("vagrant destroy -f /local/")
 end

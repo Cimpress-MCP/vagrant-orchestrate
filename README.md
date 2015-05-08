@@ -7,7 +7,7 @@
 
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
 to already provisioned (non-elastic) servers on top of the excellent [vagrant-managed-servers](http://github.com/tknerr/vagrant-managed-servers) plugin.
-It features a powerful templating `init` command, support for multiple environments, several deployment strategies 
+It features a powerful templating `init` command, support for multiple environments, several deployment strategies
 and is designed from the ground up to be cross-platform, with first class support for **Windows,
 Linux, and Mac**.
 
@@ -192,10 +192,23 @@ managed-3  Status unavailable.
 managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
 ```
 
-## Tips for Windows hosts
+## Windows
+
+### Host
 
 * Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script](https://github.com/joefitzgerald/packer-windows/blob/master/scripts/rsync.bat) to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
-* If you're using winrm-s as your communicator, you'll need to configure it first on the target machine! Check out [the plugin readme](https://github.com/Cimpress-MCP/vagrant-winrm-s/blob/master/README.md#setting-up-your-server) for instructions on how to set this up.
+
+### Managed Guest
+You'll need to bootstrap the target machine. The following script should get you there.
+
+```
+winrm quickconfig
+winrm set winrm/config/service/auth @{Negotiate="true"}
+winrm set winrm/config/service @{AllowUnencrypted="false"}
+sc config winrm start= auto
+sc config winrm type= own
+```
+* Check out [the winrm-s readme](https://github.com/Cimpress-MCP/vagrant-winrm-s/blob/master/README.md#setting-up-your-server) for more information
 
 ## Contributing
 
