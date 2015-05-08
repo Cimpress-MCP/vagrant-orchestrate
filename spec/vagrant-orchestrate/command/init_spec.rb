@@ -169,7 +169,16 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         expect(iso_env.vagrantfile.config.vm.communicator).to eq(:winrm)
         expect(iso_env.vagrantfile.config.winrm.username).to eq(described_class::DEFAULT_WINRM_USERNAME)
         expect(iso_env.vagrantfile.config.winrm.password).to eq(described_class::DEFAULT_WINRM_PASSWORD)
-        expect(iso_env.vagrantfile.config.winrm.transport).to eq(:sspinegotiate)
+        expect(iso_env.vagrantfile.config.winrm.transport).to eq(:plaintext)
+      end
+    end
+
+    describe "sspinegotiate" do
+      let(:argv) { ["--winrm", "--servers", "server1"] }
+      it "creates a vagrantfile with the winrm communicator" do
+        subject.execute
+        config = iso_env.vagrantfile.machine_config(:server1, :managed, nil)[:config]
+        expect(config.winrm.transport).to eq(:sspinegotiate)
       end
     end
 
@@ -272,6 +281,8 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         subject.execute
         vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
         expect(vagrantfile).to include("managed_servers = %w( server1 server2 )")
+        expect(iso_env.vagrantfile.machine_config(:server1, :managed, nil)).to_not be_nil
+        expect(iso_env.vagrantfile.machine_config(:server2, :managed, nil)).to_not be_nil
       end
     end
   end
