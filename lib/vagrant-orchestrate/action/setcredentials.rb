@@ -6,8 +6,14 @@ module VagrantPlugins
           return unless config_creds
 
           # Use environment variable overrides, or else what was provided in the config file
-          config_creds.username = ENV["VAGRANT_ORCHESTRATE_USERNAME"] || config_creds.username
-          config_creds.password = ENV["VAGRANT_ORCHESTRATE_PASSWORD"] || config_creds.password
+          if ENV["VAGRANT_ORCHESTRATE_USERNAME"]
+            ui.info("Using VAGRANT_ORCHESTRATE_USERNAME environment variable override")
+            config_creds.username = ENV["VAGRANT_ORCHESTRATE_USERNAME"].dup
+          end
+          if ENV["VAGRANT_ORCHESTRATE_PASSWORD"]
+            ui.info("Using VAGRANT_ORCHESTRATE_PASSWORD environment variable override")
+            config_creds.password = ENV["VAGRANT_ORCHESTRATE_PASSWORD"].dup
+          end
 
           # Use credentials file to any username or password that is still undiscovered
           check_creds_file(config_creds, ui) unless config_creds.username && config_creds.password

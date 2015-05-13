@@ -161,8 +161,8 @@ module VagrantPlugins
             machines.each do |machine|
               creds.apply_creds(machine, username, password)
             end
-          else
-            @env.ui.warn "Vagrant-orchestrate could not gather credentials. Continuing with default credentials."
+          elsif @env.vagrantfile.config.orchestrate.credentials
+            @env.ui.warn "Vagrant-orchestrate did find any credentials. Continuing with default credentials."
           end
         end
 
