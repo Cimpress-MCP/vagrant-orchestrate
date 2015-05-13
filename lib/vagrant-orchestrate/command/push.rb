@@ -14,6 +14,29 @@ class Array
   end
 end
 
+# It is useful to be able to call up, provision, reload, and destroy as a single
+# unit - it makes things like parallel provisioning more seamless and provides
+# a useful action hook for the push command.
+module VagrantPlugins
+  module ManagedServers
+    module Action
+      include Vagrant::Action::Builtin
+      def self.action_push
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use action_up
+          b.use Call, action_provision do |env, b2|
+            if env[:reboot]
+              b2.use Call, action_reload do |_env, _b3|
+              end
+            end
+          end
+          b.use action_destroy
+        end
+      end
+    end
+  end
+end
+
 module VagrantPlugins
   module Orchestrate
     module Command
@@ -115,12 +138,11 @@ module VagrantPlugins
             end
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
-              batchify(machines, :up, options)
-              batchify(machines, :provision, options) if options[:provision]
+              batchify(machines, :push, options)
+              @env.ui.info("Updating remote machine status.")
+              # TODO: Turn this into a machine action.
               upload_status_all(machines)
-              batchify(machines, :reload, options) if options[:reboot]
             ensure
-              batchify(machines, :destroy, options)
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
@@ -147,6 +169,9 @@ module VagrantPlugins
         def batchify(machines, action, options)
           @env.batch(options[:parallel]) do |batch|
             machines.each do |machine|
+              # This is necessary to disable the low level provisioning in the
+              # Vagrant builtin provisioner.
+              options[:provision_enabled] = false unless options[:provision]
               batch.action(machine, action, options)
             end
           end
