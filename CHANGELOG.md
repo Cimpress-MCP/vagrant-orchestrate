@@ -1,3 +1,9 @@
+0.5.3 (May 13th, 2015)
+
+  - Fix a bug where the VAGRANT_ORCHESTRATE_USERNAME and VAGRANT_ORCHESTRATE_PASSWORD
+  environment variable overrides weren't being read properly. The bug was repro'd
+  on a Windows environment.
+
 0.5.2 (May 8th, 2015)
 
   - Add the `--no-provision` option to the `orchestrate push` command. Useful for
