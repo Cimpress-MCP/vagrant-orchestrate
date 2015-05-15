@@ -13,7 +13,7 @@ module VagrantPlugins
         DEFAULT_WINRM_PASSWORD = "{{YOUR_WINRM_PASSWORD}}"
         DEFAULT_SSH_USERNAME = "{{YOUR_SSH_USERNAME}}"
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
-        DEFAULT_PLUGINS = ["vagrant-managed-servers"]
+        DEFAULT_PLUGINS = ["vagrant-orchestrate", "vagrant-managed-servers"]
 
         # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute

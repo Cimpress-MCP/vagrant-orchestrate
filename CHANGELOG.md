@@ -6,6 +6,9 @@
   the `up`, `provision`, `upload_stats`, and `destroy` phases would each happen in
   parallel, but the phases would be done in series.
   - Change the `vagrant orchestrate status` command so that it will run in parallel.
+  - Add `vagrant-orchestrate` as a default required plugin. Someone will have to
+  install it "by hand" to access the init functionality, but other users pulling
+  down a repo with a committed Vagrantfile will not, making each repo more self-contained.
 
 0.5.3 (May 13th, 2015)
 
