@@ -1,6 +1,8 @@
 require "English"
 require "optparse"
 require "vagrant"
+require "vagrant-managed-servers/action/upload_status"
+require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
@@ -11,29 +13,6 @@ class Array
     return [] if num_groups == 0
     slice_size = (size / Float(num_groups)).ceil
     each_slice(slice_size).to_a
-  end
-end
-
-# It is useful to be able to call up, provision, reload, and destroy as a single
-# unit - it makes things like parallel provisioning more seamless and provides
-# a useful action hook for the push command.
-module VagrantPlugins
-  module ManagedServers
-    module Action
-      include Vagrant::Action::Builtin
-      def self.action_push
-        Vagrant::Action::Builder.new.tap do |b|
-          b.use action_up
-          b.use Call, action_provision do |env, b2|
-            if env[:reboot]
-              b2.use Call, action_reload do |_env, _b3|
-              end
-            end
-          end
-          b.use action_destroy
-        end
-      end
-    end
   end
 end
 
@@ -82,6 +61,12 @@ module VagrantPlugins
           return 0 if machines.empty?
 
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
+
+          # Write the status file to disk so that it can be used as part of the
+          # push action.
+          status = RepoStatus.new
+          status.write(@env.tmp_path)
+          options[:status] = status
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -140,10 +125,10 @@ module VagrantPlugins
             begin
               batchify(machines, :push, options)
               @env.ui.info("Updating remote machine status.")
-              # TODO: Turn this into a machine action.
-              upload_status_all(machines)
             ensure
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
+              status_source = options[:status].local_path
+              super_delete(status_source) if File.exist?(status_source)
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
 
@@ -194,36 +179,6 @@ module VagrantPlugins
         def guard_clean
           message = "ERROR!\nThere are files that need to be committed first."
           RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
-        end
-
-        def upload_status_all(machines)
-          status = RepoStatus.new
-          source = File.join(@env.tmp_path, "vagrant_orchestrate_status")
-          File.write(source, status.to_json)
-          machines.each do |machine|
-            upload_status_one(source, status, machine)
-          end
-        ensure
-          super_delete(source) if File.exist?(source)
-        end
-
-        def upload_status_one(source, status, machine)
-          destination = status.remote_path(machine.config.vm.communicator)
-          parent_folder = File.split(destination)[0]
-          machine.communicate.wait_for_ready(5)
-          @logger.debug("Ensuring vagrant_orchestrate status directory exists")
-          machine.communicate.sudo("mkdir -p #{parent_folder}")
-          machine.communicate.sudo("chmod 777 #{parent_folder}")
-          @logger.debug("Uploading vagrant_orchestrate status file")
-          @logger.debug("  source: #{source}")
-          @logger.debug("  dest: #{destination}")
-          machine.communicate.upload(source, destination)
-          @logger.debug("Setting uploaded file world-writable")
-          machine.communicate.sudo("chmod 777 #{destination}")
-        rescue => ex
-          @logger.error(ex)
-          @env.ui.warn("An error occurred when trying to upload status to #{machine.name}. Continuing")
-          @env.ui.warn(ex.message)
         end
       end
     end

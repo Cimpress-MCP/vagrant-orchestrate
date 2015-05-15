@@ -4,9 +4,11 @@ module VagrantPlugins
   module Orchestrate
     class RepoStatus
       attr_reader :last_sync
+      attr_accessor :local_path
 
       def initialize
         @last_sync = Time.now.utc    # Managed servers could be in different timezones
+        @local_path = nil
       end
 
       def ref
@@ -45,6 +47,11 @@ module VagrantPlugins
           last_sync: last_sync
         }
         JSON.pretty_generate(contents)
+      end
+
+      def write(tmp_path)
+        @local_path = File.join(tmp_path, "vagrant_orchestrate_status")
+        File.write(@local_path, to_json)
       end
 
       # The path to where this should be stored on a remote machine, inclusive
