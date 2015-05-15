@@ -1,6 +1,8 @@
 require "English"
 require "optparse"
 require "vagrant"
+require "vagrant-managed-servers/action/upload_status"
+require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
@@ -60,6 +62,12 @@ module VagrantPlugins
 
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
+          # Write the status file to disk so that it can be used as part of the
+          # push action.
+          status = RepoStatus.new
+          status.write(@env.tmp_path)
+          options[:status] = status
+
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
           @env.ui.info("Pushing to managed servers using #{strategy} strategy.")
@@ -115,13 +123,11 @@ module VagrantPlugins
             end
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
-              batchify(machines, :up, options)
-              batchify(machines, :provision, options) if options[:provision]
-              upload_status_all(machines)
-              batchify(machines, :reload, options) if options[:reboot]
+              batchify(machines, :push, options)
             ensure
-              batchify(machines, :destroy, options)
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
+              status_source = options[:status].local_path
+              super_delete(status_source) if File.exist?(status_source)
               ENV.delete "VAGRANT_ORCHESTRATE_COMMAND"
             end
 
@@ -147,6 +153,9 @@ module VagrantPlugins
         def batchify(machines, action, options)
           @env.batch(options[:parallel]) do |batch|
             machines.each do |machine|
+              # This is necessary to disable the low level provisioning in the
+              # Vagrant builtin provisioner.
+              options[:provision_enabled] = false unless options[:provision]
               batch.action(machine, action, options)
             end
           end
@@ -169,36 +178,6 @@ module VagrantPlugins
         def guard_clean
           message = "ERROR!\nThere are files that need to be committed first."
           RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
-        end
-
-        def upload_status_all(machines)
-          status = RepoStatus.new
-          source = File.join(@env.tmp_path, "vagrant_orchestrate_status")
-          File.write(source, status.to_json)
-          machines.each do |machine|
-            upload_status_one(source, status, machine)
-          end
-        ensure
-          super_delete(source) if File.exist?(source)
-        end
-
-        def upload_status_one(source, status, machine)
-          destination = status.remote_path(machine.config.vm.communicator)
-          parent_folder = File.split(destination)[0]
-          machine.communicate.wait_for_ready(5)
-          @logger.debug("Ensuring vagrant_orchestrate status directory exists")
-          machine.communicate.sudo("mkdir -p #{parent_folder}")
-          machine.communicate.sudo("chmod 777 #{parent_folder}")
-          @logger.debug("Uploading vagrant_orchestrate status file")
-          @logger.debug("  source: #{source}")
-          @logger.debug("  dest: #{destination}")
-          machine.communicate.upload(source, destination)
-          @logger.debug("Setting uploaded file world-writable")
-          machine.communicate.sudo("chmod 777 #{destination}")
-        rescue => ex
-          @logger.error(ex)
-          @env.ui.warn("An error occurred when trying to upload status to #{machine.name}. Continuing")
-          @env.ui.warn(ex.message)
         end
       end
     end

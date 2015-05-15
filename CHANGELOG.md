@@ -1,3 +1,12 @@
+0.6.0 (May 15th, 2015)
+
+  - Refactor the push command to compose middleware actions rather than performing
+  a bunch of work in the command itself. This means that a push using the `parallel`
+  strategy will truly be parallel per box, as opposed to the old implementation where
+  the `up`, `provision`, `upload_stats`, and `destroy` phases would each happen in
+  parallel, but the phases would be done in series.
+  - Change the `vagrant orchestrate status` command so that it will run in parallel.
+
 0.5.3 (May 13th, 2015)
 
   - Fix a bug where the VAGRANT_ORCHESTRATE_USERNAME and VAGRANT_ORCHESTRATE_PASSWORD
