@@ -4,8 +4,6 @@ module VagrantPlugins
   module ManagedServers
     module Action
       class UploadStatus
-        include Vagrant::Util::Retryable
-
         def initialize(app, _env)
           @app    = app
           @logger = Log4r::Logger.new("vagrant_managed_servers::action::upload_status")
