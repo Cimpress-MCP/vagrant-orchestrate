@@ -19,6 +19,13 @@ module VagrantPlugins
           b.use action_destroy
         end
       end
+
+      def self.action_download_status
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use DownloadStatus
+        end
+      end
     end
   end
 end
