@@ -31,8 +31,6 @@ module VagrantPlugins
           ui.warn("Error downloading status for #{machine.name}.")
           ui.warn(ex.message)
           ENV["VAGRANT_ORCHESTRATE_STATUS"] += machine.name.to_s + "   Status unavailable.\n"
-        ensure
-          super_delete(local) if File.exist?(local)
         end
       end
     end

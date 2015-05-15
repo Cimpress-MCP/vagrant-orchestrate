@@ -38,16 +38,22 @@ module VagrantPlugins
           @logger.debug("About to download machine status")
           options = {}
           parallel = true
+          local_files = []
           @env.batch(parallel) do |batch|
             machines.each do |machine|
               options[:remote_file_path] = RepoStatus.new.remote_path(machine.config.vm.communicator)
               options[:local_file_path] = File.join(@env.tmp_path, "#{machine.name}_status")
+              local_files << options[:local_file_path]
               batch.action(machine, :download_status, options)
             end
           end
           @env.ui.info("Current managed server states:")
           @env.ui.info("")
           @env.ui.info(ENV["VAGRANT_ORCHESTRATE_STATUS"].split("\n").sort.join("\n"))
+        ensure
+          local_files.each do |local|
+            super_delete(local) if File.exist?(local)
+          end
         end
       end
     end
