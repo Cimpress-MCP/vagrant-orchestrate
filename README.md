@@ -205,6 +205,8 @@ You'll need to bootstrap the target machine. The following script should get you
 winrm quickconfig
 winrm set winrm/config/service/auth @{Negotiate="true"}
 winrm set winrm/config/service @{AllowUnencrypted="false"}
+winrm set winrm/config/winrs @{MaxShellsPerUser="25"}
+winrm set winrm/config/winrs @{MaxConcurrentUsers="25"}
 sc config winrm start= auto
 sc config winrm type= own
 ```
