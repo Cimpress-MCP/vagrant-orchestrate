@@ -124,7 +124,6 @@ module VagrantPlugins
             ENV["VAGRANT_ORCHESTRATE_COMMAND"] = "PUSH"
             begin
               batchify(machines, :push, options)
-              @env.ui.info("Updating remote machine status.")
             ensure
               @logger.debug("Finished orchestrating push to group number #{index + 1} of #{groups.size}.")
               status_source = options[:status].local_path
