@@ -1,4 +1,4 @@
-0.5.4 (May 15th, 2015)
+0.6.0 (May 15th, 2015)
 
   - Refactor the push command to compose middleware actions rather than performing
   a bunch of work in the command itself. This means that a push using the `parallel`
