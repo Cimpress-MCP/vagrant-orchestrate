@@ -5,6 +5,7 @@
   strategy will truly be parallel per box, as opposed to the old implementation where
   the `up`, `provision`, `upload_stats`, and `destroy` phases would each happen in
   parallel, but the phases would be done in series.
+  - Change the `vagrant orchestrate status` command so that it will run in parallel.
 
 0.5.3 (May 13th, 2015)
 

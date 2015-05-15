@@ -1,6 +1,8 @@
 require "json"
 require "optparse"
 require "vagrant"
+require "vagrant-managed-servers/action/download_status"
+require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
 
@@ -32,36 +34,20 @@ module VagrantPlugins
           # There is some detail output fromt he communicator.download that I
           # don't want to suppress, but I also don't want it to be interspersed
           # with the actual status information. Let's buffer the status output.
-          output = []
+          ENV["VAGRANT_ORCHESTRATE_STATUS"] = ""
           @logger.debug("About to download machine status")
-          machines.each do |machine|
-            output << get_status(RepoStatus.new.remote_path(machine.config.vm.communicator), machine)
+          options = {}
+          parallel = true
+          @env.batch(parallel) do |batch|
+            machines.each do |machine|
+              options[:remote_file_path] = RepoStatus.new.remote_path(machine.config.vm.communicator)
+              options[:local_file_path] = File.join(@env.tmp_path, "#{machine.name}_status")
+              batch.action(machine, :download_status, options)
+            end
           end
           @env.ui.info("Current managed server states:")
           @env.ui.info("")
-          output.each do |line|
-            @env.ui.info line
-          end
-        end
-
-        def get_status(remote, machine)
-          machine.communicate.wait_for_ready(5)
-          local = File.join(@env.tmp_path, "#{machine.name}_status")
-          @logger.debug("Downloading orchestrate status for #{machine.name}")
-          @logger.debug("  remote file: #{remote}")
-          @logger.debug("  local file: #{local}")
-          machine.communicate.download(remote, local)
-          content = File.read(local)
-          @logger.debug("File content:")
-          @logger.debug(content)
-          status = JSON.parse(content)
-          return machine.name.to_s + "   " + status["last_sync"] + "  " + status["ref"] + "  " + status["user"]
-        rescue => ex
-          @env.ui.warn("Error downloading status for #{machine.name}.")
-          @env.ui.warn(ex.message)
-          return machine.name.to_s + "   Status unavailable."
-        ensure
-          super_delete(local) if File.exist?(local)
+          @env.ui.info(ENV["VAGRANT_ORCHESTRATE_STATUS"].split("\n").sort.join("\n"))
         end
       end
     end
