@@ -80,3 +80,11 @@ Current machine states:
 
 local                     not created (virtualbox)
 ```
+
+## Init
+
+Vagrant Orchestrate will template the Vagrantfile and servers.json using `vagrant orchestrate init --environments dev,test,prod`. You will need to specify the servers that exist in each environment in the servers.json file and also create each of the appropriate branches.
+
+## Merge conflicts
+
+Early in the development process, we experimented with a different servers.json file per branch, meaning that the servers.json in the dev branch would only list servers that existed in dev. This created many merge conflicts and this friction quickly led to frustration. In the end, we asserted that the servers.json file should be the same across environments in order to remove the merge conflicts from the equation. This means there is a higher cost to adding a new server because it needs to be added to all environment branches, but in my experience, servers change less often than code. 
