@@ -1,7 +1,6 @@
 # Deployment Strategies
 
-Vagrant Orchestrate supports several deployment strategies including parallel and
-half and half. Here we'll cover how to use the various strategies as well as describing
+Vagrant Orchestrate supports several deployment strategies that allow you to orchestrate the behavior pushes to remote servers. Here we'll cover how to use the various strategies as well as describing
 situations when each might be useful.
 
 ## Strategies
@@ -35,6 +34,8 @@ provision [trigger](https://github.com/emyl/vagrant-triggers) to run a smoke tes
     $ vagrant orchestrate push --strategy canary
 
     config.orchestrate.strategy = :canary
+
+The prompt can be surpressed with the `--force` (`-f`) flag.
 
 ### Half and Half
 Deploys to half of the cluster in parallel, then the other half, with
@@ -76,9 +77,8 @@ Alternatively, you can specify the deployment strategy in your Vagrantfile
 
 Command line parameters take precedence over configuration values set in the Vagrantfile.
 
-
 ## Suppressing Prompts
-In order to automate the deployment process, it can be very useful to suppress
+In order to automate the deployment process, you'll need to suppress
 prompts. You can achieve that in two ways:
 
 From the command line, add the `--force` or `-f` parameters
