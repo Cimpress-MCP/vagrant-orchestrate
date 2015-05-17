@@ -6,7 +6,7 @@
 ![](http://i.imgur.com/71yAw5v.gif)
 
 This is a Vagrant 1.6+ plugin that allows orchestrated deployments
-to already provisioned (non-elastic) servers on top of the excellent [vagrant-managed-servers](http://github.com/tknerr/vagrant-managed-servers) plugin.
+to already provisioned (non-elastic) servers on top of the excellent [Vagrant Managed Servers](http://github.com/tknerr/vagrant-managed-servers) plugin.
 It features a powerful templating `init` command, support for multiple environments, several deployment strategies
 and is designed from the ground up to be cross-platform, with first class support for **Windows,
 Linux, and Mac**.
@@ -14,9 +14,10 @@ Linux, and Mac**.
 ## Quick start
 
 ```
-$ vagrant orchestrate init --shell --shell-inline "echo Hello" \
-  --servers myserver1.mydomain.com,myserver2.mydomain.com \
-  --ssh-username USERNAME --ssh-private-key-path PATH
+$ vagrant orchestrate init --servers myserver1.mydomain.com,myserver2.mydomain.com \
+  --ssh-username USERNAME --ssh-private-key-path PATH \
+  --shell --shell-inline "echo Hello"
+
 $ ls
 Vagrantfile	  dummy.box
 $ vagrant orchestrate push
@@ -38,7 +39,7 @@ $ vagrant orchestrate push
 ==> managed-myserver2.mydomain.com:  -- Server: myserver2.mydomain.com
 ```
 
-This also works for Windows with the `--winrm --winrm-username USERNAME --wirnm-password PASSWORD` parameters, but currently must be initiated from a Windows host.
+This also works for Windows with the `--winrm --winrm-username USERNAME --wirnm-password PASSWORD` parameters, but  must be initiated from a Windows host.
 
 ## Usage
 
@@ -86,8 +87,8 @@ end
 
 You'll need to edit your Vagrantfile and replace some variables, such as ssh username and
 private key, and the path to the script to run. Alternatively, you can pass them on the command
-line with `--ssh-username` and `--ssh-private-key-path`. The first line of the file defines an array of
-managed servers that the `push` command will operate on.
+line with `--ssh-username` and `--ssh-private-key-path`. The first line of the file defines an whitespace delimeted
+array of managed servers that the `push` command will operate on.
 
 ```ruby
 managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com )
@@ -96,7 +97,7 @@ managed_servers = %w( myserver1.mydomain.com myserver2.mydomain.com )
 
 This works for Windows managed servers using WinRM as well
 
-    $ vagrant orchestrate init --winrm [--winrm-username USERNAME --winrm-password PASSWORD]
+    $ vagrant orchestrate init --winrm --winrm-username USERNAME --winrm-password PASSWORD
 
 ```ruby
   required_plugins = %w( vagrant-managed-servers vagrant-winrm-s )
@@ -104,14 +105,13 @@ This works for Windows managed servers using WinRM as well
 ...
 
   config.vm.communicator = "winrm"
-  config.winrm.username = "{{YOUR_WINRM_USERNAME}}"
-  config.winrm.password = "{{YOUR_WINRM_PASSWORD}}"
-  config.winrm.transport = :sspinegotiate
+  config.winrm.username = "USERNAME"
+  config.winrm.password = "PASSWORD"
 ```
 
 #### Plugins
 
-This also supports a portable way to install plugins, just list them in the required_plugins section
+This also supports a portable and repeatable way to install plugins, just list them in the required_plugins section
 
 ```ruby
 required_plugins = %w( vagrant-managed-servers vagrant-hostsupdater )
@@ -217,16 +217,11 @@ sc config winrm type= own
 1. Fork it ( https://github.com/Cimpress-MCP/vagrant-orchestrate/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-## Development Flow
+4. Run locally with `bundle exec vagrant orchestrate [init|push|status]`
+5. `bundle exec rake build`
+6. `bundle exec rake acceptance`, which will take a few minutes
+7. Push to the branch (`git push origin my-new-feature`)
+8. Create a new Pull Request
 
 Prerequisites:
 * Ruby 2.0 or greater
-
-Flow:
-1. Develop your feature
-2. Run locally with `bundle exec vagrant orchestrate [init|push|status]`
-3. `bundle exec rake build`
-4. `bundle exec rake acceptance`, which will take a few minutes
