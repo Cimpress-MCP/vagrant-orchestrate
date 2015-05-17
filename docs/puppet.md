@@ -1,6 +1,6 @@
 # Puppet
 
-Experimental [puppet templating](docs/puppet.md) support is available as well with the `--puppet` flag and associated options
+Experimental puppet templating support is available with the `--puppet` flag and associated options
 
 ```ruby
   required_plugins = %w( vagrant-managed-servers vagrant-librarian-puppet )
@@ -18,9 +18,7 @@ The following files and folders will be placed in the puppet directory
 
 ```
 Puppetfile
-Vagrantfile
-dummy.box
-hiera/
+hieradata/
   common.yaml
 hiera.yaml
 manifests/
