@@ -1,3 +1,9 @@
+0.6.1 (May 18th, 2015)
+
+  - Change the credentials manager to add the `smb_username` and `smb_password` to
+  the synced folders for a machine if the communicator is `winrm`. For Windows,
+  this means only a single credential prompt.
+
 0.6.0 (May 15th, 2015)
 
   - Refactor the push command to compose middleware actions rather than performing
