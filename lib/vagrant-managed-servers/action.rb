@@ -32,18 +32,20 @@ module VagrantPlugins
       # https://github.com/tknerr/vagrant-managed-servers/pull/47
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       # This action is called when `vagrant provision` is called.
+      # rubocop:disable MethodLength
       def self.action_provision
         Vagrant::Action::Builder.new.tap do |b|
           b.use ConfigValidate
           b.use WarnNetworks
           b.use Call, IsLinked do |env, b2|
-            if !env[:result]
+            unless env[:result]
               b2.use MessageNotLinked
               next
             end
 
+            # rubocop:disable Lint/ShadowingOuterLocalVariable
             b2.use Call, IsReachable do |env, b3|
-              if !env[:result]
+              unless env[:result]
                 b3.use MessageNotReachable
                 next
               end
@@ -59,8 +61,10 @@ module VagrantPlugins
                 b3.use SyncFolders
               end
             end
+            # rubocop:enable Lint/ShadowingOuterLocalVariable
           end
         end
+        # rubocop:enable MethodLength
       end
     end
   end
