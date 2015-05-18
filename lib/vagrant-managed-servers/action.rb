@@ -26,6 +26,46 @@ module VagrantPlugins
           b.use DownloadStatus
         end
       end
+
+      # !!!!!!!!!!!!!!!!!!!!!! "TEMPORARY" PATCH !!!!!!!!!!!!!!!!!!!!!!!
+      # I'm adding the SMB support here, while I wait on feedback for
+      # https://github.com/tknerr/vagrant-managed-servers/pull/47
+      # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      # This action is called when `vagrant provision` is called.
+      # rubocop:disable MethodLength
+      def self.action_provision
+        Vagrant::Action::Builder.new.tap do |b|
+          b.use ConfigValidate
+          b.use WarnNetworks
+          b.use Call, IsLinked do |env, b2|
+            unless env[:result]
+              b2.use MessageNotLinked
+              next
+            end
+
+            # rubocop:disable Lint/ShadowingOuterLocalVariable
+            b2.use Call, IsReachable do |env, b3|
+              unless env[:result]
+                b3.use MessageNotReachable
+                next
+              end
+
+              b3.use Provision
+              if env[:machine].config.vm.communicator == :winrm
+                # Use the builtin vagrant folder sync for Windows target servers.
+                # This gives us SMB folder sharing, which is much faster than the
+                # WinRM uploader for any non-trivial number of files.
+                b3.use Vagrant::Action::Builtin::SyncedFolders
+              else
+                # Vagrant managed servers custom implementation
+                b3.use SyncFolders
+              end
+            end
+            # rubocop:enable Lint/ShadowingOuterLocalVariable
+          end
+        end
+        # rubocop:enable MethodLength
+      end
     end
   end
 end

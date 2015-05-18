@@ -38,6 +38,15 @@ module VagrantPlugins
             config.username = username
             config.password = password
           end
+
+          # If we're using WinRM, then we'll want to use SMB folder sync, which
+          # requires creds.
+          return unless machine.config.vm.communicator == :winrm
+          machine.config.vm.synced_folders.each do |_id, data|
+            puts data[:type]
+            data[:smb_username] = username
+            data[:smb_password] = password
+          end
         end
 
         def prompt_username(ui)
