@@ -202,7 +202,7 @@ managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cb
 You'll need to bootstrap the target machine. The following script should get you there.
 
 ```
-winrm quickconfig
+winrm quickconfig -q
 winrm set winrm/config/service/auth @{Negotiate="true"}
 winrm set winrm/config/service @{AllowUnencrypted="false"}
 winrm set winrm/config/winrs @{MaxShellsPerUser="25"}
