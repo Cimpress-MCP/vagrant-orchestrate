@@ -212,6 +212,11 @@ sc config winrm type= own
 ```
 * Check out [the winrm-s readme](https://github.com/Cimpress-MCP/vagrant-winrm-s/blob/master/README.md#setting-up-your-server) for more information
 
+### Synced Folders
+
+See the [Synced Folders](https://github.com/tknerr/vagrant-managed-servers#synced-folders-windows)
+section of the Vagrant Managed Servers readme for more detail.
+
 ## Contributing
 
 1. Fork it ( https://github.com/Cimpress-MCP/vagrant-orchestrate/fork )
