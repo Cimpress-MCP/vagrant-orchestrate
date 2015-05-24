@@ -119,7 +119,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
       it "contains the plugin" do
         subject.execute
-        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        vagrantfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
         expect(vagrantfile).to include("vagrant-librarian-puppet")
       end
 
@@ -186,7 +186,7 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--winrm"] }
       it "includes the vagrant-winrm-s plugin"do
         subject.execute
-        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
+        vagrantfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
         expect(vagrantfile).to include("vagrant-winrm-s")
       end
     end
@@ -246,12 +246,12 @@ describe VagrantPlugins::Orchestrate::Command::Init do
 
   context "plugins" do
     describe "default" do
-      it "has default plugins in vagrantfile" do
+      it "has default plugins in .vagrantplugins" do
         subject.execute
         # Since the plugin stuff isn't part of the actual Vagrantfile spec, we'll
         # just peek at the text of the file
-        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} )")
+        pluginsfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
+        expect(pluginsfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} )")
       end
     end
 
@@ -260,8 +260,8 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       it "are required" do
         subject.execute
         expected = "required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} plugin1 plugin2 )"
-        vagrantfile = File.readlines(File.join(iso_env.cwd, "Vagrantfile")).join
-        expect(vagrantfile).to include(expected)
+        pluginsfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
+        expect(pluginsfile).to include(expected)
       end
     end
   end

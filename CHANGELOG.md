@@ -1,3 +1,8 @@
+0.6.2 (Unreleased)
+
+  - Extract the `required_plugins` definition and installation logic from the
+  `Vagrantfile` to a new `.vagrantplugins` file per https://github.com/mitchellh/vagrant/issues/3775
+
 0.6.1 (May 23rd, 2015)
 
   - Change the credentials manager to add the `smb_username` and `smb_password` to
