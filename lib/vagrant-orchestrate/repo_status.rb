@@ -26,7 +26,8 @@ module VagrantPlugins
       end
 
       def repo
-        @repo ||= File.basename(remote_origin_url, ".git")
+        @repo ||= ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REPO"]
+        @repo ||= File.basename(`git rev-parse --show-toplevel`.chomp)
         @repo
       end
 
