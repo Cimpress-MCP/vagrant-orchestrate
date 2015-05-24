@@ -126,7 +126,26 @@ module VagrantPlugins
           options[:ssh_username] ||= DEFAULT_SSH_USERNAME
           options[:ssh_private_key_path] ||= DEFAULT_SSH_PRIVATE_KEY_PATH unless options[:ssh_password]
 
-          write_vagrant_files(options)
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
+                                             provisioners: options[:provisioners],
+                                             shell_paths: options[:shell_paths],
+                                             shell_inline: options[:shell_inline],
+                                             puppet_librarian_puppet: options[:puppet_librarian_puppet],
+                                             puppet_hiera: options[:puppet_hiera],
+                                             communicator: options[:communicator],
+                                             winrm_username: options[:winrm_username],
+                                             winrm_password: options[:winrm_password],
+                                             ssh_username: options[:ssh_username],
+                                             ssh_password: options[:ssh_password],
+                                             ssh_private_key_path: options[:ssh_private_key_path],
+                                             servers: options[:servers],
+                                             environments: options[:environments],
+                                             plugins: options[:plugins],
+                                             creds_prompt: options[:creds_prompt]
+                                            )
+          write_file("Vagrantfile", contents, options)
+          FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
+                       File.join(@env.cwd, "dummy.box"))
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
           # Success, exit status 0
@@ -135,30 +154,6 @@ module VagrantPlugins
         # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         private
-
-        def write_vagrant_files(options)
-          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
-                                             provisioners: options[:provisioners], shell_paths: options[:shell_paths],
-                                             shell_inline: options[:shell_inline],
-                                             puppet_librarian_puppet: options[:puppet_librarian_puppet],
-                                             puppet_hiera: options[:puppet_hiera], communicator: options[:communicator],
-                                             winrm_username: options[:winrm_username],
-                                             winrm_password: options[:winrm_password],
-                                             ssh_username: options[:ssh_username], ssh_password: options[:ssh_password],
-                                             ssh_private_key_path: options[:ssh_private_key_path],
-                                             servers: options[:servers],
-                                             environments: options[:environments], creds_prompt: options[:creds_prompt]
-                                            )
-          write_file("Vagrantfile", contents, options)
-
-          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/.vagrantplugins"),
-                                             plugins: options[:plugins]
-                                            )
-          write_file(".vagrantplugins", contents, options)
-
-          FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
-                       File.join(@env.cwd, "dummy.box"))
-        end
 
         def init_puppet(options)
           return unless options[:provisioners].include? "puppet"
