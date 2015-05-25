@@ -1,4 +1,4 @@
-0.6.2 (May 24th, 2015)
+0.6.2 (May 25th, 2015)
 
   - Change the implementation of the `RepoStatus.repo` method from relying on a
   remote named `origin` to using the state of the local file system. Thanks @rnowosielski
