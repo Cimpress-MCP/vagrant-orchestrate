@@ -1,7 +1,8 @@
-0.6.2 (Unreleased)
+0.6.2 (May 25th, 2015)
 
-  - Extract the `required_plugins` definition and installation logic from the
-  `Vagrantfile` to a new `.vagrantplugins` file per https://github.com/mitchellh/vagrant/issues/3775
+  - Change the implementation of the `RepoStatus.repo` method from relying on a
+  remote named `origin` to using the state of the local file system. Thanks @rnowosielski
+  for the bug report.
 
 0.6.1 (May 23rd, 2015)
 
