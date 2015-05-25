@@ -1,0 +1,7 @@
+<% if plugins.any? -%>
+required_plugins = %w( <% plugins.each do |p| -%><%= p %> <% end -%>)
+
+required_plugins.each do |plugin|
+  system "vagrant plugin install #{plugin}" unless Vagrant.has_plugin? plugin
+end
+<% end %>

@@ -1,3 +1,8 @@
+0.6.3 (Unreleased)
+
+  - Extract the `required_plugins` definition and installation logic from the
+  `Vagrantfile` to a new `.vagrantplugins` file per https://github.com/mitchellh/vagrant/issues/3775
+
 0.6.2 (May 25th, 2015)
 
   - Change the implementation of the `RepoStatus.repo` method from relying on a
