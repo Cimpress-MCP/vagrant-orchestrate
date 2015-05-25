@@ -6,6 +6,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
 
   TEST_REF = "050bfd9c686b06c292a9614662b0ab1bbf652db3"
   TEST_REMOTE_ORIGIN_URL = "http://github.com/Cimpress-MCP/vagrant-orchestrate.git"
+  TEST_REPO = "/users/cbaldauf/dev/vagrant-orchestrate"
 
   before do
     environment.skeleton("basic")
@@ -25,6 +26,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
     # environment variables. See vagrant-orchestrate/repo_status.rb for impl.
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REF"] = TEST_REF
     ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REMOTE_ORIGIN_URL"] = TEST_REMOTE_ORIGIN_URL
+    ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REPO"] = TEST_REPO
     ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] = "true"
     execute("vagrant", "orchestrate", "push", "/managed-1/")
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")

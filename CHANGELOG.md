@@ -1,3 +1,9 @@
+0.6.2 (May 25th, 2015)
+
+  - Change the implementation of the `RepoStatus.repo` method from relying on a
+  remote named `origin` to using the state of the local file system. Thanks @rnowosielski
+  for the bug report.
+
 0.6.1 (May 23rd, 2015)
 
   - Change the credentials manager to add the `smb_username` and `smb_password` to
