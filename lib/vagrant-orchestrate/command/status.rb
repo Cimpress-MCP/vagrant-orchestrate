@@ -41,14 +41,14 @@ module VagrantPlugins
           local_files = []
           @env.batch(parallel) do |batch|
             machines.each do |machine|
-              options[:remote_file_path] = RepoStatus.new.remote_path(machine.config.vm.communicator)
+              status = RepoStatus.new(@env.root_path)
+              options[:remote_file_path] = status.remote_path(machine.config.vm.communicator)
               options[:local_file_path] = File.join(@env.tmp_path, "#{machine.name}_status")
               local_files << options[:local_file_path]
               batch.action(machine, :download_status, options)
             end
           end
-          @env.ui.info("Current managed server states:")
-          @env.ui.info("")
+          @env.ui.info("Current managed server states:\n")
           @env.ui.info(ENV["VAGRANT_ORCHESTRATE_STATUS"].split("\n").sort.join("\n"))
         ensure
           local_files.each do |local|

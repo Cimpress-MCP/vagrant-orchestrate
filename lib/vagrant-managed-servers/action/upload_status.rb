@@ -23,7 +23,7 @@ module VagrantPlugins
           @logger.debug("Ensuring vagrant_orchestrate status directory exists")
           machine.communicate.sudo("mkdir -p #{parent_folder}")
           machine.communicate.sudo("chmod 777 #{parent_folder}")
-          ui.info("Uploading vagrant orchestrate status")
+          ui.info("Uploading vagrant orchestrate status to #{destination}")
           @logger.debug("Uploading vagrant_orchestrate status")
           @logger.debug("  source: #{source}")
           @logger.debug("  dest: #{destination}")

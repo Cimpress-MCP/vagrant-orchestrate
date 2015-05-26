@@ -64,7 +64,7 @@ module VagrantPlugins
 
           # Write the status file to disk so that it can be used as part of the
           # push action.
-          status = RepoStatus.new
+          status = RepoStatus.new(@env.root_path)
           status.write(@env.tmp_path)
           options[:status] = status
 

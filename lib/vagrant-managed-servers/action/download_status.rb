@@ -18,6 +18,7 @@ module VagrantPlugins
         def download_status(machine, local, remote, ui)
           machine.communicate.wait_for_ready(5)
           @logger.debug("Downloading orchestrate status for #{machine.name}")
+          ui.info("Downloading orchestrate status from #{remote}")
           @logger.debug("  remote file: #{remote}")
           @logger.debug("  local file: #{local}")
           machine.communicate.download(remote, local)

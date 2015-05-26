@@ -3,6 +3,8 @@
   - Extract the `required_plugins` definition and installation logic from the
   `Vagrantfile` to a new `.vagrantplugins` file per https://github.com/mitchellh/vagrant/issues/4347
   - Change required_plugins from array to hash[plugin-name] = {options}. This allows specifying specific versions of plugins to be installed as well as alternate gem sources, which is useful for internally hosted gems.
+  - Fall back to the Vagrant environment's `root_path` if the working directory is
+  not a git repo. Fixes [#34](https://github.com/Cimpress-MCP/vagrant-orchestrate/issues/34)
 
 0.6.2 (May 25th, 2015)
 
