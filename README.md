@@ -116,6 +116,17 @@ required_plugins["vagrant-orchestrate"] = {}
 required_plugins["vagrant-managed-servers"] = { version: "0.7.0" }
 ```
 
+If you are executing in a shared environment, like a build slave, you can create your own
+own plugin install directory by setting the `VAGRANT_HOME` variable to something relative
+to the current directory.
+
+    $ VAGRANT_HOME=./.vagrant.d vagrant orchestrate push
+
+or
+
+    > SET VAGRANT_HOME=./.vagrant.d
+    > vagrant orchestrate push
+
 #### Working with multiple environments
 
 Vagrant Orchestrate offers a way to manage multiple environments using a combination of a single servers.json file and the name of the current git branch as an indicator of the current environment.
