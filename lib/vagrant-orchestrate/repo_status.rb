@@ -3,12 +3,14 @@ require "json"
 module VagrantPlugins
   module Orchestrate
     class RepoStatus
-      attr_reader :last_sync
+      attr_reader :last_sync, :root_path
       attr_accessor :local_path
 
-      def initialize
+      def initialize(root_path)
         @last_sync = Time.now.utc    # Managed servers could be in different timezones
         @local_path = nil
+        # The fully qualified path to the root of the repo
+        @root_path = root_path
       end
 
       def ref
@@ -21,13 +23,15 @@ module VagrantPlugins
 
       def remote_origin_url
         @remote_origin_url ||= ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REMOTE_ORIGIN_URL"]
-        @remote_origin_url ||= `git config --get remote.origin.url`.chomp
+        @remote_origin_url ||= `git config --get remote.origin.url 2>#{File::NULL}`.chomp
         @remote_origin_url
       end
 
       def repo
         @repo ||= ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_REPO"]
-        @repo ||= File.basename(`git rev-parse --show-toplevel`.chomp)
+        @repo ||= File.basename(`git rev-parse --show-toplevel 2>#{File::NULL}`.chomp)
+        # This might not be a git repo, and that should still be supported.
+        @repo = File.basename(root_path) if @repo.nil? || @repo.empty?
         @repo
       end
 

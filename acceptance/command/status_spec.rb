@@ -6,7 +6,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
 
   TEST_REF = "050bfd9c686b06c292a9614662b0ab1bbf652db3"
   TEST_REMOTE_ORIGIN_URL = "http://github.com/Cimpress-MCP/vagrant-orchestrate.git"
-  TEST_REPO = "/users/cbaldauf/dev/vagrant-orchestrate"
+  TEST_REPO = "vagrant-orchestrate"
 
   before do
     environment.skeleton("basic")
@@ -14,7 +14,8 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
 
   it "handles no status file gracefully" do
     # Make sure we're starting from a clean slate, rspec order isn't guaranteed.
-    execute("vagrant", "ssh", "-c", "\"rm -rf /var/state/vagrant_orchestrate\" managed-1")
+    execute("vagrant", "up", "managed-1")
+    execute("vagrant", "ssh", "-c", "\"sudo rm -rf /var/state/vagrant_orchestrate\"", "managed-1")
     # All commands are executed against a single machine to reduce variability
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
     expect(result.stdout).to include("Status unavailable.")
@@ -30,7 +31,7 @@ describe "vagrant orchestrate status", component: "orchestrate/status" do
     ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] = "true"
     execute("vagrant", "orchestrate", "push", "/managed-1/")
     result = execute("vagrant", "orchestrate", "status", "/managed-1/")
-    status = VagrantPlugins::Orchestrate::RepoStatus.new
+    status = VagrantPlugins::Orchestrate::RepoStatus.new(TEST_REPO)
     # Punting on date. Can always add it later if needed
     expect(result.stdout).to include(status.ref)
     expect(result.stdout).to include(status.user)
