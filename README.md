@@ -56,10 +56,6 @@ Which produces a simple default Vagrantfile that can push to managed servers:
 ```ruby
 managed_servers = %w( )
 
-required_plugins = %w( vagrant-managed-servers )
-required_plugins.each do |plugin|
-  system "vagrant plugin install #{plugin}" unless Vagrant.has_plugin? plugin
-end
 Vagrant.configure("2") do |config|
   # This disables up, provision, reload, and destroy for managed servers. Use
   # `vagrant orchestrate push` to communicate with managed servers.
@@ -111,10 +107,13 @@ This works for Windows managed servers using WinRM as well
 
 #### Plugins
 
-This also supports a portable and repeatable way to install plugins, just list them in the required_plugins section
+This also supports a portable and repeatable way to install plugins, just list them in the .vagrantplugins file.
+`version` and `source` are the supported values in the options hash, but neither is required.
 
 ```ruby
-required_plugins = %w( vagrant-managed-servers vagrant-hostsupdater )
+required_plugins = {}
+required_plugins["vagrant-orchestrate"] = {}
+required_plugins["vagrant-managed-servers"] = { version: "0.7.0" }
 ```
 
 #### Working with multiple environments

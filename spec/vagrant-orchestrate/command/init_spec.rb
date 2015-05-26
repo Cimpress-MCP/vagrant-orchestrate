@@ -251,7 +251,9 @@ describe VagrantPlugins::Orchestrate::Command::Init do
         # Since the plugin stuff isn't part of the actual Vagrantfile spec, we'll
         # just peek at the text of the file
         pluginsfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
-        expect(pluginsfile).to include("required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} )")
+        described_class::DEFAULT_PLUGINS.each do |plugin|
+          expect(pluginsfile).to include("required_plugins[\"#{plugin}\"]")
+        end
       end
     end
 
@@ -259,9 +261,9 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       let(:argv) { ["--plugins", "plugin1,plugin2"] }
       it "are required" do
         subject.execute
-        expected = "required_plugins = %w( #{described_class::DEFAULT_PLUGINS.join(' ')} plugin1 plugin2 )"
         pluginsfile = File.readlines(File.join(iso_env.cwd, ".vagrantplugins")).join
-        expect(pluginsfile).to include(expected)
+        expect(pluginsfile).to include("required_plugins[\"plugin1\"]")
+        expect(pluginsfile).to include("required_plugins[\"plugin2\"]")
       end
     end
   end
