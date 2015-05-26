@@ -1,7 +1,3 @@
-AllCops:
-  Exclude:
-    - '*.gemspec'
-
 Metrics/LineLength:
   Max: 120
 
@@ -22,3 +18,6 @@ Style/FileName:
 
 Metrics/AbcSize:
   Max: 100
+
+RegexpLiteral:
+  MaxSlashes: 0
