@@ -1,4 +1,4 @@
-0.6.3 (Unreleased)
+0.6.3 (May 26th, 2015)
 
   - Extract the `required_plugins` definition and installation logic from the
   `Vagrantfile` to a new `.vagrantplugins` file per https://github.com/mitchellh/vagrant/issues/4347
