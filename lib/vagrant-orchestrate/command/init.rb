@@ -25,6 +25,7 @@ module VagrantPlugins
           options[:plugins] = DEFAULT_PLUGINS
           options[:puppet_librarian_puppet] = false
           options[:puppet_hiera] = true
+          options[:git] = true
 
           opts = OptionParser.new do |o|
             o.banner = "Usage: vagrant orchestrate init [options]"
@@ -99,6 +100,8 @@ module VagrantPlugins
               options[:environments] = list
             end
 
+            o.on("--[no-]git", "Include useful templates for working in a git repository. Default is true.")
+
             o.on("-f", "--force", "Force overwriting of files") do
               options[:force] = true
             end
@@ -116,9 +119,6 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          init_puppet options
-          init_environments options
-
           options[:shell_paths] ||= options[:shell_inline] ? [] : [DEFAULT_SHELL_PATH]
           options[:winrm_username] ||= DEFAULT_WINRM_USERNAME
           options[:winrm_password] ||= DEFAULT_WINRM_PASSWORD
@@ -126,7 +126,10 @@ module VagrantPlugins
           options[:ssh_username] ||= DEFAULT_SSH_USERNAME
           options[:ssh_private_key_path] ||= DEFAULT_SSH_PRIVATE_KEY_PATH unless options[:ssh_password]
 
-          write_vagrant_files(options)
+          init_puppet options
+          init_environments options
+          init_vagrant_files options
+          init_git options
           @env.ui.info(I18n.t("vagrant.commands.init.success"), prefix: false)
 
           # Success, exit status 0
@@ -136,30 +139,6 @@ module VagrantPlugins
 
         private
 
-        def write_vagrant_files(options)
-          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
-                                             provisioners: options[:provisioners], shell_paths: options[:shell_paths],
-                                             shell_inline: options[:shell_inline],
-                                             puppet_librarian_puppet: options[:puppet_librarian_puppet],
-                                             puppet_hiera: options[:puppet_hiera], communicator: options[:communicator],
-                                             winrm_username: options[:winrm_username],
-                                             winrm_password: options[:winrm_password],
-                                             ssh_username: options[:ssh_username], ssh_password: options[:ssh_password],
-                                             ssh_private_key_path: options[:ssh_private_key_path],
-                                             servers: options[:servers],
-                                             environments: options[:environments], creds_prompt: options[:creds_prompt]
-                                            )
-          write_file("Vagrantfile", contents, options)
-
-          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/.vagrantplugins"),
-                                             plugins: options[:plugins]
-                                            )
-          write_file(".vagrantplugins", contents, options)
-
-          FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
-                       File.join(@env.cwd, "dummy.box"))
-        end
-
         def init_puppet(options)
           return unless options[:provisioners].include? "puppet"
 
@@ -168,7 +147,7 @@ module VagrantPlugins
             contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/puppet/Puppetfile"))
             write_file File.join("puppet", "Puppetfile"), contents, options
             FileUtils.mkdir_p(File.join(@env.cwd, "puppet", "modules"))
-            write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options)
+            write_file(File.join(@env.cwd, "puppet", "modules", ".gitignore"), "*", options) if options[:git]
             options[:plugins] << "vagrant-librarian-puppet"
           end
 
@@ -199,6 +178,44 @@ module VagrantPlugins
           @env.ui.info(" 3. Create a git branch for each environment")
           environments.each do |env|
             @env.ui.info("    git branch #{env}")
+          end
+        end
+
+        def init_vagrant_files(options)
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/Vagrantfile"),
+                                             provisioners: options[:provisioners], shell_paths: options[:shell_paths],
+                                             shell_inline: options[:shell_inline],
+                                             puppet_librarian_puppet: options[:puppet_librarian_puppet],
+                                             puppet_hiera: options[:puppet_hiera], communicator: options[:communicator],
+                                             winrm_username: options[:winrm_username],
+                                             winrm_password: options[:winrm_password],
+                                             ssh_username: options[:ssh_username], ssh_password: options[:ssh_password],
+                                             ssh_private_key_path: options[:ssh_private_key_path],
+                                             servers: options[:servers],
+                                             environments: options[:environments], creds_prompt: options[:creds_prompt]
+                                            )
+          write_file("Vagrantfile", contents, options)
+
+          contents = TemplateRenderer.render(Orchestrate.source_root.join("templates/vagrant/.vagrantplugins"),
+                                             plugins: options[:plugins]
+                                            )
+          write_file(".vagrantplugins", contents, options)
+
+          FileUtils.cp(Orchestrate.source_root.join("templates", "vagrant", "dummy.box"),
+                       File.join(@env.cwd, "dummy.box"))
+        end
+
+        def init_git(options)
+          return unless options[:git]
+
+          gitignore_path = File.join(@env.cwd, ".gitignore")
+          contents = ::IO.readlines(gitignore_path) if File.exist?(gitignore_path)
+          contents ||= []
+
+          open(gitignore_path, "a") do |f|
+            %w( .vagrant/ ).each do |path|
+              f.puts path unless contents.include?(path + "\n")
+            end
           end
         end
 

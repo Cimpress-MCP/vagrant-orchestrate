@@ -1,3 +1,8 @@
+0.6.4 (Unreleased)
+
+  - Add common ignores to the `.gitignore` file in the root of the repo unless
+  `--no-git` is specified. Fixes [#28](https://github.com/Cimpress-MCP/vagrant-orchestrate/issues/28)
+
 0.6.3 (May 26th, 2015)
 
   - Extract the `required_plugins` definition and installation logic from the

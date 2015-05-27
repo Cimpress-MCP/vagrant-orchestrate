@@ -307,6 +307,21 @@ describe VagrantPlugins::Orchestrate::Command::Init do
     end
   end
 
+  context "git" do
+    describe ".gitignore" do
+      it "is written" do
+        subject.execute
+        expect(Dir.entries(iso_env.cwd)).to include(".gitignore")
+      end
+
+      it "contains ignored paths" do
+        subject.execute
+        contents = File.readlines(File.join(iso_env.cwd, ".gitignore")).join
+        expect(contents).to include(".vagrant/")
+      end
+    end
+  end
+
   context "box" do
     describe "dummy.box" do
       it "winds up in the target directory" do
