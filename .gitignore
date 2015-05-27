@@ -13,6 +13,6 @@
 *.a
 mkmf.log
 
-/.vagrant/
+.vagrant/
 .DS_Store
 servers.json
