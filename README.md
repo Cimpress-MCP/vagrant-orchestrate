@@ -207,6 +207,8 @@ managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cb
 ### Host
 
 * Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script](https://github.com/joefitzgerald/packer-windows/blob/master/scripts/rsync.bat) to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
+* You MUST have at least PowerShell 3 installed in order to use the SMB folder synch. If you have PowerShell
+2 installed and try to execute a folder sync, it will hang with no good error message.
 
 ### Managed Guest
 You'll need to bootstrap the target machine. The following script should get you there.
