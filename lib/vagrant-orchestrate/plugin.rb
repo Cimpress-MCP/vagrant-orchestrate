@@ -85,8 +85,8 @@ module VagrantPlugins
 
       def self.read_git_branch
         @logger.debug("Reading git branch")
-        if ENV["GIT_BRANCH"]
-          git_branch = ENV["GIT_BRANCH"]
+        if ENV.key?("GIT_BRANCH")
+          git_branch = ENV["GIT_BRANCH"].split("/").last
           @logger.debug("Read git branch #{git_branch} from GIT_BRANCH environment variable")
         else
           command = "git rev-parse --abbrev-ref HEAD 2>&1"
