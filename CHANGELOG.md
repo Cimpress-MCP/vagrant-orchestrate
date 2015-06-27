@@ -1,7 +1,10 @@
-0.6.4 (June 26th, 2015)
+0.6.5 (June 27th, 2015)
 
   - Split GIT_BRANCH environment variable on slash and take the last element, since
   that is how Jenkins is providing it. [#40](https://github.com/Cimpress-MCP/vagrant-orchestrate/issues/40)
+
+0.6.4 (June 26th, 2015)
+
   - Add common ignores to the `.gitignore` file in the root of the repo unless
   `--no-git` is specified. Fixes [#28](https://github.com/Cimpress-MCP/vagrant-orchestrate/issues/28)
 
