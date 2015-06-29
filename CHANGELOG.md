@@ -1,3 +1,8 @@
+0.7.0 (Unreleased)
+
+  - Add support for tracking deployments with [deployment-tracker](https://github.com/Cimpress-MCP/deployment-tracker).
+  Add configuration option `config.orchestrate.tracker_host = 'deploymenttracker.mydomain.com'`
+
 0.6.5 (June 27th, 2015)
 
   - Split GIT_BRANCH environment variable on slash and take the last element, since
