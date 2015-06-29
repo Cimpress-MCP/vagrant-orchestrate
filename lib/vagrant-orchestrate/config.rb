@@ -7,12 +7,14 @@ module VagrantPlugins
       attr_accessor :filter_managed_commands
       attr_accessor :strategy
       attr_accessor :force_push
+      attr_accessor :tracker_host
       attr_accessor :credentials
 
       def initialize
         @filter_managed_commands = UNSET_VALUE
         @strategy = UNSET_VALUE
         @force_push = UNSET_VALUE
+        @tracker_host = UNSET_VALUE
         @credentials = Credentials.new
       end
 
@@ -40,6 +42,7 @@ module VagrantPlugins
         @filter_managed_commands = false if @filter_managed_commands == UNSET_VALUE
         @strategy = :serial if @strategy == UNSET_VALUE
         @force_push = false if @force_push == UNSET_VALUE
+        @tracker_host = nil if @tracker_host == UNSET_VALUE
         @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end
