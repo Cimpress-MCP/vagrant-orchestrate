@@ -14,13 +14,14 @@ module VagrantPlugins
         return unless host
         @logger.debug("Tracking deployment start to #{host}.")
         id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
+        hostname = `hostname`
         deployment = {
           deployment_id: id,
           engine: "vagrant_orchestrate",
           engine_version: VagrantPlugins::Orchestrate::VERSION,
-          user: "TODO",
-          host: "TODO",
-          environment: "TODO",
+          user: status.user,
+          host: hostname,
+          environment: status.branch,
           package: status.remote_origin_url || status.repo,
           version: status.ref
         }

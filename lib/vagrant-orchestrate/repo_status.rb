@@ -35,6 +35,12 @@ module VagrantPlugins
         @repo
       end
 
+      def branch
+        @branch ||= ENV["VAGRANT_ORCHESTRATE_STATUS_TEST_BRANCH"]
+        @branch ||= `git rev-parse --abbrev-ref HEAD`.chomp
+        @branch
+      end
+
       def user
         user = ENV["USER"] || ENV["USERNAME"] || "unknown"
         user = ENV["USERDOMAIN"] + "\\" + user if ENV["USERDOMAIN"]
