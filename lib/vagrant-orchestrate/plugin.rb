@@ -1,5 +1,6 @@
 require "vagrant-orchestrate/action/filtermanaged"
 require "vagrant-orchestrate/action/setcredentials"
+require "vagrant-orchestrate/deployment_tracker"
 require "securerandom"
 
 begin

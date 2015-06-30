@@ -38,6 +38,7 @@ module VagrantPlugins
         end
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def finalize!
         @filter_managed_commands = false if @filter_managed_commands == UNSET_VALUE
         @strategy = :serial if @strategy == UNSET_VALUE
@@ -46,6 +47,7 @@ module VagrantPlugins
         @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       class Credentials
         # Same as Vagrant does to distinguish uninitialized variables and intentional assignments

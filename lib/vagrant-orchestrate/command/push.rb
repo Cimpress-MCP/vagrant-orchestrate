@@ -71,8 +71,9 @@ module VagrantPlugins
           status.write(@env.tmp_path)
           options[:status] = status
 
-          init_deployment_tracker
-          track_deployment_start status
+          deployment_tracker = VagrantPlugins::Orchestrate::DeploymentTracker
+          deployment_tracker.init_deployment_tracker @env.vagrantfile.config.orchestrate.tracker_host
+          deployment_tracker.track_deployment_start @env.vagrantfile.config.orchestrate.tracker_host, status, @env.ui
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -105,7 +106,7 @@ module VagrantPlugins
             result = false
           end
 
-          track_deployment_end result
+          deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host, result, @env.ui
 
           return 1 unless result
           0
@@ -186,53 +187,6 @@ module VagrantPlugins
         def guard_clean
           message = "ERROR!\nThere are files that need to be committed first."
           RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
-        end
-
-        def init_deployment_tracker
-          return unless @env.vagrantfile.config.orchestrate.tracker_host
-          SwaggerClient::Swagger.configure do |config|
-            config.host = @env.vagrantfile.config.orchestrate.tracker_host
-            config.format = "json"
-          end
-        end
-
-        def track_deployment_start(status)
-          tracker_host = @env.vagrantfile.config.orchestrate.tracker_host
-          return unless tracker_host
-          @logger.debug("Tracking deployment start to #{tracker_host}.")
-          id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
-          deployment = {
-            deployment_id: id,
-            engine: "vagrant_orchestrate",
-            engine_version: VagrantPlugins::Orchestrate::VERSION,
-            user: 'TODO',
-            host: 'TODO',
-            environment: "TODO",
-            package: status.remote_origin_url || status.repo,
-            version: status.ref
-          }
-          DeploymentTrackerClient::DefaultApi.post_deployment(id, deployment)
-        rescue => ex
-          @env.ui.warn("There was an error notifying deployment tracker. See error log for details.")
-          @logger.warn("Error tracking deployment start for deployment #{id}")
-          @logger.warn(ex)
-        end
-
-        def track_deployment_end(success)
-          tracker_host = @env.vagrantfile.config.orchestrate.tracker_host
-          return unless tracker_host
-          @logger.debug("Tracking deployment end to #{tracker_host}.")
-          id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
-          result = success ? "success" : "failure"
-          elapsed_seconds = (Time.now - @start).to_i
-          deployment = { deployment_id: id,
-                         result: result,
-                         elapsed_seconds: elapsed_seconds }
-          DeploymentTrackerClient::DefaultApi.put_deployment(id, deployment)
-        rescue => ex
-          @env.ui.warn("There was an error notifying deployment tracker. See error log for details.")
-          @logger.warn("Error tracking deployment end for deployment #{id}")
-          @logger.warn(ex)
         end
       end
     end
