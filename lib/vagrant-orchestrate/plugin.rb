@@ -1,5 +1,6 @@
 require "vagrant-orchestrate/action/filtermanaged"
 require "vagrant-orchestrate/action/setcredentials"
+require "securerandom"
 
 begin
   require "vagrant"
@@ -15,6 +16,7 @@ end
 
 module VagrantPlugins
   module Orchestrate
+    DEPLOYMENT_ID = SecureRandom.uuid
     class Plugin < Vagrant.plugin("2")
       name "Orchestrate"
       description <<-DESC

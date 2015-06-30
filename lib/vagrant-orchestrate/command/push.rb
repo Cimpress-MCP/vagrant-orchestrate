@@ -6,6 +6,7 @@ require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
+require "deployment-tracker-client"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
@@ -60,6 +61,8 @@ module VagrantPlugins
           machines = filter_unmanaged(argv)
           return 0 if machines.empty?
 
+          @start = Time.now
+
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
           # Write the status file to disk so that it can be used as part of the
@@ -67,6 +70,9 @@ module VagrantPlugins
           status = RepoStatus.new(@env.root_path)
           status.write(@env.tmp_path)
           options[:status] = status
+
+          init_deployment_tracker
+          track_deployment_start status
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -98,6 +104,8 @@ module VagrantPlugins
             @env.ui.error("Invalid deployment strategy specified")
             result = false
           end
+
+          track_deployment_end result
 
           return 1 unless result
           0
@@ -178,6 +186,53 @@ module VagrantPlugins
         def guard_clean
           message = "ERROR!\nThere are files that need to be committed first."
           RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
+        end
+
+        def init_deployment_tracker
+          return unless @env.vagrantfile.config.orchestrate.tracker_host
+          SwaggerClient::Swagger.configure do |config|
+            config.host = @env.vagrantfile.config.orchestrate.tracker_host
+            config.format = "json"
+          end
+        end
+
+        def track_deployment_start(status)
+          tracker_host = @env.vagrantfile.config.orchestrate.tracker_host
+          return unless tracker_host
+          @logger.debug("Tracking deployment start to #{tracker_host}.")
+          id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
+          deployment = {
+            deployment_id: id,
+            engine: "vagrant_orchestrate",
+            engine_version: VagrantPlugins::Orchestrate::VERSION,
+            user: 'TODO',
+            host: 'TODO',
+            environment: "TODO",
+            package: status.remote_origin_url || status.repo,
+            version: status.ref
+          }
+          DeploymentTrackerClient::DefaultApi.post_deployment(id, deployment)
+        rescue => ex
+          @env.ui.warn("There was an error notifying deployment tracker. See error log for details.")
+          @logger.warn("Error tracking deployment start for deployment #{id}")
+          @logger.warn(ex)
+        end
+
+        def track_deployment_end(success)
+          tracker_host = @env.vagrantfile.config.orchestrate.tracker_host
+          return unless tracker_host
+          @logger.debug("Tracking deployment end to #{tracker_host}.")
+          id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
+          result = success ? "success" : "failure"
+          elapsed_seconds = (Time.now - @start).to_i
+          deployment = { deployment_id: id,
+                         result: result,
+                         elapsed_seconds: elapsed_seconds }
+          DeploymentTrackerClient::DefaultApi.put_deployment(id, deployment)
+        rescue => ex
+          @env.ui.warn("There was an error notifying deployment tracker. See error log for details.")
+          @logger.warn("Error tracking deployment end for deployment #{id}")
+          @logger.warn(ex)
         end
       end
     end
