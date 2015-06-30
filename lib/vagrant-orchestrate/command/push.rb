@@ -26,7 +26,7 @@ module VagrantPlugins
 
         @logger = Log4r::Logger.new("vagrant_orchestrate::command::push")
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:disable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
           options[:force] = @env.vagrantfile.config.orchestrate.force_push
@@ -107,13 +107,14 @@ module VagrantPlugins
               result = false
             end
           ensure
-            deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host, @start, result, @env.ui
+            deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host,
+                                                    @start, result, @env.ui
           end
 
           return 1 unless result
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:enable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def split(machines)
           groups = machines.in_groups(2)
