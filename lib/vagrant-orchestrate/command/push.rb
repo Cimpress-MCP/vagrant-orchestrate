@@ -83,30 +83,32 @@ module VagrantPlugins
           strategy = :serial if machines.size == 1
           strategy = :half_half if strategy.to_sym == :canary_half_half && machines.size == 2
 
-          case strategy.to_sym
-          when :serial
-            options[:parallel] = false
-            result = deploy(options, machines)
-          when :parallel
-            result = deploy(options, machines)
-          when :canary
-            # A single canary server and then the rest
-            result = deploy(options, machines.take(1), machines.drop(1))
-          when :half_half
-            # Split into two (almost) equal groups
-            groups = split(machines)
-            result = deploy(options, groups.first, groups.last)
-          when :canary_half_half
-            # A single canary and then two equal groups
-            canary = machines.take(1)
-            groups = split(machines.drop(1))
-            result = deploy(options, canary, groups.first, groups.last)
-          else
-            @env.ui.error("Invalid deployment strategy specified")
-            result = false
+          begin
+            case strategy.to_sym
+            when :serial
+              options[:parallel] = false
+              result = deploy(options, machines)
+            when :parallel
+              result = deploy(options, machines)
+            when :canary
+              # A single canary server and then the rest
+              result = deploy(options, machines.take(1), machines.drop(1))
+            when :half_half
+              # Split into two (almost) equal groups
+              groups = split(machines)
+              result = deploy(options, groups.first, groups.last)
+            when :canary_half_half
+              # A single canary and then two equal groups
+              canary = machines.take(1)
+              groups = split(machines.drop(1))
+              result = deploy(options, canary, groups.first, groups.last)
+            else
+              @env.ui.error("Invalid deployment strategy specified")
+              result = false
+            end
+          ensure
+            deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host, @start, result, @env.ui
           end
-
-          deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host, result, @env.ui
 
           return 1 unless result
           0
