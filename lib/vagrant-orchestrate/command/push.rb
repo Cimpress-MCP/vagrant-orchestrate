@@ -1,7 +1,6 @@
 require "English"
 require "optparse"
 require "vagrant"
-require "vagrant-managed-servers/action/upload_status"
 require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
@@ -61,7 +60,7 @@ module VagrantPlugins
           machines = filter_unmanaged(argv)
           return 0 if machines.empty?
 
-          @start = Time.now
+          @start_time = Time.now
 
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
@@ -71,9 +70,12 @@ module VagrantPlugins
           status.write(@env.tmp_path)
           options[:status] = status
 
-          deployment_tracker = VagrantPlugins::Orchestrate::DeploymentTracker
-          deployment_tracker.init_deployment_tracker @env.vagrantfile.config.orchestrate.tracker_host
-          deployment_tracker.track_deployment_start @env.vagrantfile.config.orchestrate.tracker_host, status, @env.ui
+          @env.action_runner.run(VagrantPlugins::ManagedServers::Action::InitDeploymentTracker,
+                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host)
+          @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentStart,
+                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                 status: status,
+                                 args: ARGV.drop(2).join(" "))
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -107,8 +109,10 @@ module VagrantPlugins
               result = false
             end
           ensure
-            deployment_tracker.track_deployment_end @env.vagrantfile.config.orchestrate.tracker_host,
-                                                    @start, result, @env.ui
+            @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentEnd,
+                                   tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                   start_time: @start_time,
+                                   result: result)
           end
 
           return 1 unless result
