@@ -22,7 +22,7 @@ module VagrantPlugins
           id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
           server = {
             deployment_id: id,
-            hostname: machine.name.to_s,
+            hostname: machine.provider_config.server,
             result: "success",
             elapsed_seconds: (Time.now - start_time).to_i
           }

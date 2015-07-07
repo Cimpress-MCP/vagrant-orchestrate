@@ -112,7 +112,7 @@ module VagrantPlugins
             @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentEnd,
                                    tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
                                    start_time: @start_time,
-                                   result: result)
+                                   success: result)
           end
 
           return 1 unless result

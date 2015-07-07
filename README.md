@@ -211,6 +211,8 @@ which can collect and record metadata about deployments, including summary recor
 
     config.orchestrate.tracker_host = "deploymenttracker.mydomain.com"
 
+See more info on [deployment tracker integration](docs/deployment_tracker.md).
+
 ## Windows
 
 ### Host
