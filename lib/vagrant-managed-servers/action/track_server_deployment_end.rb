@@ -6,7 +6,7 @@ module VagrantPlugins
       class TrackServerDeploymentEnd
         def initialize(app, _env)
           @app    = app
-          @logger = Log4r::Logger.new("vagrant_managed_servers::action::track_server_deployment_start")
+          @logger = Log4r::Logger.new("vagrant_managed_servers::action::track_server_deployment_end")
         end
 
         def call(env)

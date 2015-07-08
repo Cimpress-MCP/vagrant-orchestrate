@@ -1,4 +1,5 @@
 require "log4r"
+require "vagrant-orchestrate/version"
 
 module VagrantPlugins
   module ManagedServers
