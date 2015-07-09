@@ -1,5 +1,5 @@
 require "log4r/outputter/outputter"
-require "json"
+require "time"
 
 module Log4r
   class DeploymentTrackerOutputter < Outputter
