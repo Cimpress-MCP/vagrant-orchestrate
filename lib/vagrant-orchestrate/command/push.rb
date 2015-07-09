@@ -6,6 +6,7 @@ require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
 require "deployment-tracker-client"
+require "log4r/outputter/deployment_tracker_outputter"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
@@ -71,7 +72,8 @@ module VagrantPlugins
           options[:status] = status
 
           @env.action_runner.run(VagrantPlugins::ManagedServers::Action::InitDeploymentTracker,
-                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host)
+                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                 ui: @env.ui)
           @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentStart,
                                  tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
                                  status: status,
