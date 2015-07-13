@@ -8,6 +8,7 @@ module VagrantPlugins
       attr_accessor :strategy
       attr_accessor :force_push
       attr_accessor :tracker_host
+      attr_accessor :tracker_logging_enabled
       attr_accessor :credentials
 
       def initialize
@@ -15,6 +16,7 @@ module VagrantPlugins
         @strategy = UNSET_VALUE
         @force_push = UNSET_VALUE
         @tracker_host = UNSET_VALUE
+        @tracker_logging_enabled = UNSET_VALUE
         @credentials = Credentials.new
       end
 
@@ -38,16 +40,17 @@ module VagrantPlugins
         end
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def finalize!
         @filter_managed_commands = false if @filter_managed_commands == UNSET_VALUE
         @strategy = :serial if @strategy == UNSET_VALUE
         @force_push = false if @force_push == UNSET_VALUE
         @tracker_host = nil if @tracker_host == UNSET_VALUE
+        @tracker_logging_enabled = true if @tracker_logging_enabled == UNSET_VALUE
         @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       class Credentials
         # Same as Vagrant does to distinguish uninitialized variables and intentional assignments

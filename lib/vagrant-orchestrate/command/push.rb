@@ -73,6 +73,7 @@ module VagrantPlugins
 
           @env.action_runner.run(VagrantPlugins::ManagedServers::Action::InitDeploymentTracker,
                                  tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                 tracker_logging_enabled: @env.vagrantfile.config.orchestrate.tracker_logging_enabled,
                                  ui: @env.ui)
           @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentStart,
                                  tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,

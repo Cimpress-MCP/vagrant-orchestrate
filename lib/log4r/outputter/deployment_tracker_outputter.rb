@@ -19,7 +19,7 @@ module Log4r
 
       begin
         id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
-        DeploymentTrackerClient::DefaultApi.post_logs(id, data)
+        DeploymentTrackerClient::DefaultApi.post_logs(id, [data])
       rescue
         @logger.warn "Unable to send log messages to deployment-tracker"
       end

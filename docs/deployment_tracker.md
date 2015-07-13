@@ -85,6 +85,14 @@ Add the following configuration option to your Vagrantfile
 
     config.orchestrate.tracker_host = "http://deploymenttracker.mydomain.com"
 
+## Logging
+
+Each line sent to Vagrant's UI (your console) will be sent to deployment tracker and
+forwarded on to an appropriate log collector. The current implementation is naive and
+creates an HTTP POST request for each line printed to the console. If this is causing
+performance issues with your deployment, you can disable it with:
+
+    config.orchestrate.tracker_logging_enabled = false
 
 ## Initialization
 

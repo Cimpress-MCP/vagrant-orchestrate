@@ -24,11 +24,14 @@ module VagrantPlugins
           SwaggerClient::Swagger.configure do |config|
             config.host = host
           end
-          ui = env[:ui]
-          unless ui.logger.outputters.collect(&:name).include?("deployment-tracker")
-            # Make sure that we've hooked the global ui logger as well. We should
-            # see if we can do this earlier in the process to capture more of the output
-            ui.logger.add Log4r::DeploymentTrackerOutputter.new("deployment-tracker")
+
+          if env[:tracker_logging_enabled]
+            ui = env[:ui]
+            unless ui.logger.outputters.collect(&:name).include?("deployment-tracker")
+              # Make sure that we've hooked the global ui logger as well. We should
+              # see if we can do this earlier in the process to capture more of the output
+              ui.logger.add Log4r::DeploymentTrackerOutputter.new("deployment-tracker")
+            end
           end
           @app.call(env)
         end
