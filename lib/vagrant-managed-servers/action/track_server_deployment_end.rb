@@ -28,7 +28,7 @@ module VagrantPlugins
           }
           DeploymentTrackerClient::DefaultApi.put_server(id, server)
         rescue => ex
-          ui.warn("There was an error notifying deployment tracker of server end. See error log for details.")
+          ui.warn("There was an error notifying deployment tracker of server end. Run with --debug for more details.")
           ui.warn(ex.message)
           pp ex
           @logger.warn("Error tracking deployment server end for deployment #{id}")

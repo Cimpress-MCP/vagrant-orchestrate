@@ -33,7 +33,7 @@ module VagrantPlugins
           }
           DeploymentTrackerClient::DefaultApi.post_deployment(id, deployment)
         rescue => ex
-          ui.warn("There was an error notifying deployment tracker. See error log for details.")
+          ui.warn("There was an error notifying deployment tracker. Run with --debug for more details.")
           @logger.warn("Error tracking deployment start for deployment #{id}")
           @logger.warn(ex)
         end
