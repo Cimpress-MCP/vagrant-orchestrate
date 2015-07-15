@@ -1,4 +1,4 @@
-0.7.0 (Unreleased)
+0.7.0 (July 15th, 2015)
 
   - Add support for tracking deployments with [deployment-tracker](https://github.com/Cimpress-MCP/deployment-tracker).
   Add configuration option `config.orchestrate.tracker_host = 'deploymenttracker.mydomain.com'`
