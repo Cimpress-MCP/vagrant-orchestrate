@@ -18,6 +18,7 @@ module VagrantPlugins
           return unless host
           @logger.debug("Tracking deployment end to #{host}.")
           id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
+          ui.info("Deployment tracked in deployment-tracker with ID: #{id}")
           result = success ? "success" : "failure"
           elapsed_seconds = (Time.now - start).to_i
           deployment = { deployment_id: id,

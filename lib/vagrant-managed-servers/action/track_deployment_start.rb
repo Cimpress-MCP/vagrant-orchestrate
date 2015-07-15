@@ -18,7 +18,7 @@ module VagrantPlugins
         def track_deployment_start(host, status, ui, args)
           return unless host
           id = VagrantPlugins::Orchestrate::DEPLOYMENT_ID
-          ui.info("Deployment being tracked in deployment-tracker with ID: #{id}")
+          ui.info("Deployment tracked in deployment-tracker with ID: #{id}")
           @logger.debug("Tracking deployment start to #{host}.")
           hostname = `hostname`.chomp
           deployment = {
