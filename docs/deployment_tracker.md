@@ -9,7 +9,7 @@ whether you're deploying from your laptop to a cloud instance or from a build sl
 1. Deployments starting
 2. Deployment starting on a server
 3. Deployment completing on a server
-4. Vagrant log messages, including console output
+4. Vagrant console output
 5. Deployment completion
 
 The summary record for a successful deployment to 4 servers using the half_half strategy is recorded as follows:
