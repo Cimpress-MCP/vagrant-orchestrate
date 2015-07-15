@@ -6,7 +6,6 @@ module VagrantPlugins
           @app = app
         end
 
-        # rubocop:disable Metrics/AbcSize
         def call(env)
           machine = env[:machine]
           if machine.provider_name == :managed
@@ -20,7 +19,6 @@ module VagrantPlugins
             @app.call(env)
           end
         end
-        # rubocop:enable Metrics/AbcSize
       end
     end
   end

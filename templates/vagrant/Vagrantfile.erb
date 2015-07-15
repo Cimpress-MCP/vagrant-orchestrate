@@ -14,6 +14,9 @@ Vagrant.configure("2") do |config|
   <% if creds_file_path -%>
   config.orchestrate.credentials.file_path = "<%= creds_file_path%>"
   <% end -%>
+  <% if tracker_host -%>
+  config.orchestrate.tracker_host = "<%= tracker_host%>"
+  <% end -%>
 
   <% if provisioners.include? "shell" -%>
   <% shell_paths.each do |path| -%>

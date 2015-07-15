@@ -339,4 +339,14 @@ describe VagrantPlugins::Orchestrate::Command::Init do
       end
     end
   end
+
+  context "deployment tracker" do
+    describe "deployment tracker host is specified" do
+      let(:argv) { ["--deployment-tracker-host", "http://deploymenttracker.io"] }
+      it "should be set in the Vagrantfile" do
+        subject.execute
+        expect(iso_env.vagrantfile.config.orchestrate.tracker_host).to eq("http://deploymenttracker.io")
+      end
+    end
+  end
 end

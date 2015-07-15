@@ -204,6 +204,18 @@ managed-3  Status unavailable.
 managed-4  2015-04-19 00:43:07 UTC  e983dddd8041c5db77494266328f1d266430f57d  cbaldauf
 ```
 
+### Tracking Deployment metadata
+
+Vagrant Orchestrate has support for integrating with [deployment-tracker](https://github.com/Cimpress-MCP/deployment-tracker),
+which can collect and record metadata about deployments, including summary records, metrics, and logs. This is great if you're
+in a distributed deployment environment, but need a central store for operational or compliance reasons.
+
+Add the following configuration option to your Vagrantfile
+
+    config.orchestrate.tracker_host = "deploymenttracker.mydomain.com"
+
+See more info on [deployment tracker integration](docs/deployment_tracker.md).
+
 ## Windows
 
 ### Host

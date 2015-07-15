@@ -1,11 +1,12 @@
 require "English"
 require "optparse"
 require "vagrant"
-require "vagrant-managed-servers/action/upload_status"
 require_relative "../../vagrant-managed-servers/action"
 require "vagrant-orchestrate/action/setcredentials"
 require "vagrant-orchestrate/repo_status"
 require_relative "command_mixins"
+require "deployment-tracker-client"
+require "log4r/outputter/deployment_tracker_outputter"
 
 # Borrowed from http://stackoverflow.com/questions/12374645/splitting-an-array-into-equal-parts-in-ruby
 class Array
@@ -25,7 +26,7 @@ module VagrantPlugins
 
         @logger = Log4r::Logger.new("vagrant_orchestrate::command::push")
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:disable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def execute
           options = {}
           options[:force] = @env.vagrantfile.config.orchestrate.force_push
@@ -60,6 +61,8 @@ module VagrantPlugins
           machines = filter_unmanaged(argv)
           return 0 if machines.empty?
 
+          @start_time = Time.now
+
           retrieve_creds(machines) if @env.vagrantfile.config.orchestrate.credentials
 
           # Write the status file to disk so that it can be used as part of the
@@ -67,6 +70,15 @@ module VagrantPlugins
           status = RepoStatus.new(@env.root_path)
           status.write(@env.tmp_path)
           options[:status] = status
+
+          @env.action_runner.run(VagrantPlugins::ManagedServers::Action::InitDeploymentTracker,
+                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                 tracker_logging_enabled: @env.vagrantfile.config.orchestrate.tracker_logging_enabled,
+                                 ui: @env.ui)
+          @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentStart,
+                                 tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                 status: status,
+                                 args: ARGV.drop(2).join(" "))
 
           options[:parallel] = true
           strategy = options[:strategy] || @env.vagrantfile.config.orchestrate.strategy
@@ -76,33 +88,40 @@ module VagrantPlugins
           strategy = :serial if machines.size == 1
           strategy = :half_half if strategy.to_sym == :canary_half_half && machines.size == 2
 
-          case strategy.to_sym
-          when :serial
-            options[:parallel] = false
-            result = deploy(options, machines)
-          when :parallel
-            result = deploy(options, machines)
-          when :canary
-            # A single canary server and then the rest
-            result = deploy(options, machines.take(1), machines.drop(1))
-          when :half_half
-            # Split into two (almost) equal groups
-            groups = split(machines)
-            result = deploy(options, groups.first, groups.last)
-          when :canary_half_half
-            # A single canary and then two equal groups
-            canary = machines.take(1)
-            groups = split(machines.drop(1))
-            result = deploy(options, canary, groups.first, groups.last)
-          else
-            @env.ui.error("Invalid deployment strategy specified")
-            result = false
+          begin
+            case strategy.to_sym
+            when :serial
+              options[:parallel] = false
+              result = deploy(options, machines)
+            when :parallel
+              result = deploy(options, machines)
+            when :canary
+              # A single canary server and then the rest
+              result = deploy(options, machines.take(1), machines.drop(1))
+            when :half_half
+              # Split into two (almost) equal groups
+              groups = split(machines)
+              result = deploy(options, groups.first, groups.last)
+            when :canary_half_half
+              # A single canary and then two equal groups
+              canary = machines.take(1)
+              groups = split(machines.drop(1))
+              result = deploy(options, canary, groups.first, groups.last)
+            else
+              @env.ui.error("Invalid deployment strategy specified")
+              result = false
+            end
+          ensure
+            @env.action_runner.run(VagrantPlugins::ManagedServers::Action::TrackDeploymentEnd,
+                                   tracker_host: @env.vagrantfile.config.orchestrate.tracker_host,
+                                   start_time: @start_time,
+                                   success: result)
           end
 
           return 1 unless result
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:enable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def split(machines)
           groups = machines.in_groups(2)

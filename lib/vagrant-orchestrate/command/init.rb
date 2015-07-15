@@ -15,7 +15,7 @@ module VagrantPlugins
         DEFAULT_SSH_PRIVATE_KEY_PATH = "{{YOUR_SSH_PRIVATE_KEY_PATH}}"
         DEFAULT_PLUGINS = ["vagrant-orchestrate", "vagrant-managed-servers"]
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:disable MethodLength
         def execute
           options = {}
 
@@ -114,6 +114,10 @@ module VagrantPlugins
             o.on("--credentials-file-path FILEPATH", String, cfpmsg) do |file_path|
               options[:creds_file_path] = file_path
             end
+
+            o.on("--deployment-tracker-host host", String, "Fully qualified URL of deployment-tracker instance") do |t|
+              options[:tracker_host] = t
+            end
           end
 
           argv = parse_options(opts)
@@ -135,7 +139,7 @@ module VagrantPlugins
           # Success, exit status 0
           0
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:enable MethodLength
 
         private
 
@@ -191,8 +195,8 @@ module VagrantPlugins
                                              winrm_password: options[:winrm_password],
                                              ssh_username: options[:ssh_username], ssh_password: options[:ssh_password],
                                              ssh_private_key_path: options[:ssh_private_key_path],
-                                             servers: options[:servers],
-                                             environments: options[:environments], creds_prompt: options[:creds_prompt]
+                                             servers: options[:servers], environments: options[:environments],
+                                             creds_prompt: options[:creds_prompt], tracker_host: options[:tracker_host]
                                             )
           write_file("Vagrantfile", contents, options)
 
