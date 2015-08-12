@@ -223,6 +223,7 @@ See more info on [deployment tracker integration](docs/deployment_tracker.md).
 * Need rsync? Install [OpenSSH](http://www.mls-software.com/opensshd.html) and then run this [script](https://github.com/joefitzgerald/packer-windows/blob/master/scripts/rsync.bat) to install rsync. Vagrant managed servers currently only works with cygwin based rsync implementations.
 * You MUST have at least PowerShell 3 installed in order to use the SMB folder synch. If you have PowerShell
 2 installed and try to execute a folder sync, it will hang with no good error message.
+* Libcurl.dll must be installed and on your path. You can find it [here](https://github.com/danielcavanagh/typhoeus/blob/b8c089f1576cc5094eb84380c98a9146ab9dbba4/README.textile#windows-support)
 
 ### Managed Guest
 You'll need to bootstrap the target machine. The following script should get you there.
