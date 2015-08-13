@@ -1,3 +1,8 @@
+0.7.1 (August 13th, 2015)
+
+  - Add configuration option for disable_commit_guard, which when set to true will silence
+  the message about uncommitted files. Use at your own risk.
+
 0.7.0 (July 15th, 2015)
 
   - Add support for tracking deployments with [deployment-tracker](https://github.com/Cimpress-MCP/deployment-tracker).

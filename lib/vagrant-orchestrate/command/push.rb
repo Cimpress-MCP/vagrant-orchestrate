@@ -56,7 +56,8 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          guard_clean unless ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"]
+          guard_clean unless ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] && \
+                             @env.vagrantfile.config.orchestrate.disable_commit_guard
 
           machines = filter_unmanaged(argv)
           return 0 if machines.empty?
