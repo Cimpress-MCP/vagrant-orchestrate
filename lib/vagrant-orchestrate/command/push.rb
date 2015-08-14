@@ -56,8 +56,7 @@ module VagrantPlugins
           argv = parse_options(opts)
           return unless argv
 
-          guard_clean unless ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] && \
-                             @env.vagrantfile.config.orchestrate.disable_commit_guard
+          guard_clean
 
           machines = filter_unmanaged(argv)
           return 0 if machines.empty?
@@ -196,6 +195,8 @@ module VagrantPlugins
         end
 
         def guard_clean
+          return if ENV["VAGRANT_ORCHESTRATE_NO_GUARD_CLEAN"] || \
+                    @env.vagrantfile.config.orchestrate.disable_commit_guard
           message = "ERROR!\nThere are files that need to be committed first."
           RepoStatus.clean? && RepoStatus.committed? && !RepoStatus.untracked? || abort(message)
         end
