@@ -165,6 +165,10 @@ will be checked.
 
 Experimental [puppet templating](docs/puppet.md) support is available as well with the `--puppet` flag and associated options
 
+### Configuraiton
+
+See details on the various configuration options [here](docs/config.md).
+
 ### Pushing changes
 Go ahead and push changes to your managed servers, in serial by default.
 

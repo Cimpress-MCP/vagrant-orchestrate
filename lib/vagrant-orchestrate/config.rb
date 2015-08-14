@@ -10,6 +10,7 @@ module VagrantPlugins
       attr_accessor :tracker_host
       attr_accessor :tracker_logging_enabled
       attr_accessor :credentials
+      attr_accessor :disable_commit_guard
 
       def initialize
         @filter_managed_commands = UNSET_VALUE
@@ -17,6 +18,7 @@ module VagrantPlugins
         @force_push = UNSET_VALUE
         @tracker_host = UNSET_VALUE
         @tracker_logging_enabled = UNSET_VALUE
+        @disable_commit_guard = UNSET_VALUE
         @credentials = Credentials.new
       end
 
@@ -47,6 +49,7 @@ module VagrantPlugins
         @force_push = false if @force_push == UNSET_VALUE
         @tracker_host = nil if @tracker_host == UNSET_VALUE
         @tracker_logging_enabled = true if @tracker_logging_enabled == UNSET_VALUE
+        @disable_commit_guard = false if @disable_commit_guard == UNSET_VALUE
         @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end
