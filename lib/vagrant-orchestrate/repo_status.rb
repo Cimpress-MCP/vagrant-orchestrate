@@ -7,9 +7,8 @@ module VagrantPlugins
       attr_accessor :local_path
 
       def initialize(root_path)
-        @last_sync = Time.now.utc    # Managed servers could be in different timezones
-        @local_path = nil
-        # The fully qualified path to the root of the repo
+        @last_sync = Time.now.utc # Managed servers could be in different timezones
+        @local_path = nil         # The fully qualified path to the root of the repo
         @root_path = root_path
       end
 
