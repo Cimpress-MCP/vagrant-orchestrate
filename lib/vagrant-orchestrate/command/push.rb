@@ -131,7 +131,7 @@ module VagrantPlugins
           groups
         end
 
-        # rubocop:disable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:disable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def deploy(options, *groups)
           groups.select! { |g| g.size > 0 }
           groups.each_with_index do |machines, index|
@@ -158,7 +158,7 @@ module VagrantPlugins
             end
           end
         end
-        # rubocop:enable Metrics/AbcSize, MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        # rubocop:enable MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
         def prompt_for_continue
           result = @env.ui.ask("Deployment paused for manual review. Would you like to continue? (y/n) ")

@@ -5,7 +5,7 @@ require "vagrant-spec/unit"
 describe VagrantPlugins::Orchestrate::Command::Root do
   include_context "vagrant-unit"
 
-  let(:argv)     { [] }
+  let(:argv) { [] }
   let(:iso_env) do
     env = isolated_environment
     env.vagrantfile("")

@@ -18,6 +18,3 @@ Style/FileName:
 
 Metrics/AbcSize:
   Max: 100
-
-RegexpLiteral:
-  MaxSlashes: 0
