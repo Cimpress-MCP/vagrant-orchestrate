@@ -1,3 +1,8 @@
+0.7.2 (September 25th, 2015)
+
+  - Include windows guest directive on winrm template to correct issues with incorrect
+  guest identification.
+
 0.7.1 (August 13th, 2015)
 
   - Add configuration option for disable_commit_guard, which when set to true will silence
