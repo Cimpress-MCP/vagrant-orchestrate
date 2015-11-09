@@ -1,3 +1,9 @@
+0.8.0 (Unreleased)
+
+  - Add an action as part of the push command that will change ownership of all synced folders to the configured user to avoid permission conflicts.
+    - Added config.orchestrate.take_synced_file_ownership and documented in docs/config.md (default is true)
+    - Should have no impact on Windows systems, since `chown` is filtered out by the winrm communicator filter
+
 0.7.2 (September 25th, 2015)
 
   - Include windows guest directive on winrm template to correct issues with incorrect
