@@ -20,7 +20,6 @@ module VagrantPlugins
 
           @logger.debug "Taking ownership of synced folders"
           machine.config.vm.synced_folders.each do |synced_folder|
-            name = synced_folder[0]
             options = synced_folder[1]
             next if options[:disabled]
             options[:owner] ||= machine.ssh_info[:username]
