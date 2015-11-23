@@ -11,6 +11,7 @@ module VagrantPlugins
       attr_accessor :tracker_logging_enabled
       attr_accessor :credentials
       attr_accessor :disable_commit_guard
+      attr_accessor :take_synced_folder_ownership
 
       def initialize
         @filter_managed_commands = UNSET_VALUE
@@ -19,6 +20,7 @@ module VagrantPlugins
         @tracker_host = UNSET_VALUE
         @tracker_logging_enabled = UNSET_VALUE
         @disable_commit_guard = UNSET_VALUE
+        @take_synced_folder_ownership = UNSET_VALUE
         @credentials = Credentials.new
       end
 
@@ -50,6 +52,7 @@ module VagrantPlugins
         @tracker_host = nil if @tracker_host == UNSET_VALUE
         @tracker_logging_enabled = true if @tracker_logging_enabled == UNSET_VALUE
         @disable_commit_guard = false if @disable_commit_guard == UNSET_VALUE
+        @take_synced_folder_ownership = true if @take_synced_folder_ownership == UNSET_VALUE
         @credentials = nil if @credentials.unset?
         @credentials.finalize! if @credentials
       end

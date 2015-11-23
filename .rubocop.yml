@@ -16,5 +16,8 @@ StringLiterals:
 Style/FileName:
   Enabled: false
 
+Style/RegexpLiteral:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 100

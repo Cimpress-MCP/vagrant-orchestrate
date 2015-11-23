@@ -1,5 +1,6 @@
 require "vagrant-managed-servers/action/upload_status"
 require "vagrant-managed-servers/action/init_deployment_tracker"
+require "vagrant-managed-servers/action/take_synced_folder_ownership"
 require "vagrant-managed-servers/action/track_deployment_start"
 require "vagrant-managed-servers/action/track_deployment_end"
 require "vagrant-managed-servers/action/track_server_deployment_start"
@@ -17,6 +18,7 @@ module VagrantPlugins
         Vagrant::Action::Builder.new.tap do |b|
           b.use TrackServerDeploymentStart
           b.use action_up
+          b.use TakeSyncedFolderOwnership
           b.use Call, action_provision do |env, b2|
             if env[:reboot]
               b2.use Call, action_reload do |_env, _b3|
