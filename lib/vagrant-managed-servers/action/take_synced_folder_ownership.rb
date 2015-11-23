@@ -25,7 +25,7 @@ module VagrantPlugins
             options[:owner] ||= machine.ssh_info[:username]
             @logger.debug "Taking ownership of #{name}"
             @logger.debug options
-            machine.communicate.sudo "chown #{options[:owner]} -R #{options[:guestpath]}"
+            machine.communicate.sudo "chown '#{options[:owner]}' -R #{options[:guestpath]}"
           end
         end
       end
