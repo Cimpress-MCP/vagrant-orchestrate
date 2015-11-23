@@ -15,5 +15,5 @@ the `disable_commit_guard` configuration option will disable this protection.
 When multiple users are using Vagrant Orchestrate to push to the same target servers,
 there can arise permission issues for folders that are synced. When `true`, Vagrant
 Orchestrate will change ownership of the guestpath of all synced folders to be the
-`owner` specified in the `synced_folder` or the `ssh_info.username`. Has no affect
+`owner` specified in the `synced_folder` or the `ssh_info.username`. Has no impact
 for Windows guests. Default is `true`.
