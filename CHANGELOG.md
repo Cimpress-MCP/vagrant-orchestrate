@@ -1,4 +1,4 @@
-0.8.0 (Unreleased)
+0.8.0 (November 23rd, 2015)
 
   - Add an action as part of the push command that will change ownership of all synced folders to the configured user to avoid permission conflicts.
     - Added config.orchestrate.take_synced_file_ownership and documented in docs/config.md (default is true)
