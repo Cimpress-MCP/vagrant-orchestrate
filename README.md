@@ -220,6 +220,14 @@ Add the following configuration option to your Vagrantfile
 
 See more info on [deployment tracker integration](docs/deployment_tracker.md).
 
+## Ubuntu
+
+### Sudoers
+
+* When deploying you must have no pasword prompt setup. You can do this by adding the following to your sudoers file. (edit via `sudo visudo`)
+
+`UserName ALL=(ALL:ALL) NOPASSWD:ALL` or `%GroupName ALL=(ALL:ALL) NOPASSWD:ALL`
+
 ## Windows
 
 ### Host
