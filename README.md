@@ -237,6 +237,8 @@ See more info on [deployment tracker integration](docs/deployment_tracker.md).
 2 installed and try to execute a folder sync, it will hang with no good error message.
 * Libcurl.dll must be installed and on your path. You can find it [here](https://github.com/danielcavanagh/typhoeus/blob/b8c089f1576cc5094eb84380c98a9146ab9dbba4/README.textile#windows-support)
 
+Alternative to the above instructions there is a [puppet module](https://github.com/gradifi/win_vagrant_orchestrate) that will setup a windows machine for you.
+
 ### Managed Guest
 You'll need to bootstrap the target machine. The following script should get you there.
 
